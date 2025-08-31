@@ -1,0 +1,147 @@
+/* About Hero Section */
+.about-hero {
+    height: 60vh;
+    background-size: cover !important;
+    background-position: center !important;
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+
+/* Breadcrumb Styles */
+.breadcrumb {
+    background: transparent;
+    padding: 0;
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+.breadcrumb a{
+    text-decoration: none;
+}
+
+.breadcrumb-item.active {
+    color: var(--secBule);
+}
+
+.about-hero .breadcrumb-item + .breadcrumb-item::before {
+    color: rgba(255, 255, 255, 0.5);
+    content: ">";
+}
+
+/* Our Story Section */
+.our-story{
+    background-color: var(--background-section);
+}
+.our-story h2{
+    color: var(--Blue-color);
+}
+
+.achievement-box {
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    border-left: 4px solid var(--secBule);
+}
+
+.achievements h3{
+    color: var(--secBule);
+}
+
+.achievement-box:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+@media (max-width: 480px) {
+    .achievement-box{
+        font-size: 0.8rem;
+    }
+}
+
+/* Core Values Section */
+.mission{
+    background-color: var(--Blue-color);
+    color: white;
+}
+.core-value {
+    background: rgba(255,255,255,0.1);
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.core-value:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+}
+
+.icon-container {
+    width: 80px;
+    height: 80px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* why-choose-us */
+.why-choose-us{
+    background-color: var(--background-section);
+}
+.why-choose-us h2,
+.why-choose-us h4{
+    color: var(--Blue-color);
+}
+
+/* Team Section */
+.team h2{
+    color: var(--Blue-color);
+}
+
+.team-img {
+    height: 250px;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.team-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.team-member:hover .team-img img {
+    transform: scale(1.05);
+}
+
+.social-links a {
+    width: 35px;
+    height: 35px;
+    background: var(--Blue-color);
+    color: white;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 5px;
+    transition: all 0.3s ease;
+    text-decoration: none;
+}
+
+.social-links a:hover {
+    background: var(--secBule);
+    transform: translateY(-3px);
+}
+
+
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .about-hero {
+        height: 50vh;
+    }
+    
+    .about-hero h1 {
+        font-size: 2.5rem;
+    }
+}

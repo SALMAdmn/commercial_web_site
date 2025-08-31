@@ -1,0 +1,70 @@
+سؤال ممتاز 👌
+
+الفرق بين **`mail()` العادية** و **PHPMailer (ou SMTP)** هو كبير جدًا، نخليك نفهمها خطوة بخطوة :
+
+---
+
+### 🔹 1. Fonction `mail()` native de PHP
+
+* تستعمل فقط :
+
+  ```php
+  mail($to, $subject, $message, $headers);
+  ```
+* **المشكل :**
+
+  * `mail()` يعتمد على أن السيرفر عندك (XAMPP أو hébergement) فيه **mail server** (Postfix, Sendmail…).
+  * في **local (XAMPP)**، ما عندكش mail server، لهذا يطيح لك الخطأ :
+
+    ```
+    Failed to connect to mailserver at "localhost" port 25
+    ```
+  * حتى في hébergement mutualisé (OVH, Hostinger, etc.) بزاف المرات الإيميلات ترجع **spam** أو ما توصلش أصلًا.
+
+---
+
+### 🔹 2. PHPMailer avec SMTP
+
+* PHPMailer ما يعتمدش على mail server ديالك.
+* يمر مباشرة عبر **serveur SMTP حقيقي** (مثلا Gmail, Outlook, Yahoo, ou serveur de ton hébergeur).
+* Exemple :
+
+  * تستعمل `smtp.gmail.com` مع authentification (`username` + `password`).
+* **المميزات :**
+
+  * الإيميلات ما تمشيش للـ spam بسهولة.
+  * عندك تحكم كامل (UTF-8, HTML, pièces jointes…).
+  * خدمة SMTP تكون آمنة (SSL/TLS).
+  * تقدر تسجل الأخطاء بسهولة.
+
+---
+
+### 🔹 3. لماذا نفضل PHPMailer
+
+* `mail()` يصلح فقط إذا كنت على **hébergement qui configure déjà un mail server** (rare).
+* PHPMailer + SMTP هو **المعيار الاحترافي** : يستعملوه في ووردبريس، لارافيل، جملة، ووردبريس… إلخ.
+* في local développement (XAMPP), الحل الوحيد لتجربة **إرسال حقيقي** هو PHPMailer مع SMTP (مثلا Gmail).
+
+---
+
+👉 باختصار :
+
+* **mail()** = بسيط، لكن ما يخدمش في local و بزاف المشاكل مع spam.
+* **PHPMailer (SMTP)** = مضمون، احترافي، يخدم محليًا (مع Gmail SMTP)، ويعطيك مميزات إضافية.
+
+---
+
+تحبي نشرحلك **الفرق بالصور والكود** (واحد باستعمال `mail()`, وواحد بـ PHPMailer) باش تشوفي النتيجة بعينيك؟
+
+
+
+
+
+
+
+
+
+
+
+
+Pour gérer ce type de comportement dynamique, il faut un langage côté client ou côté serveur capable de détecter si l’utilisateur est connecté et de modifier l’affichage ou les liens en conséquence. Voici une explication complète

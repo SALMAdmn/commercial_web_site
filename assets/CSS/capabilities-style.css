@@ -1,0 +1,207 @@
+/* Capabilities Hero */
+.capabilities-hero {
+    height: 60vh;
+    background-size: cover !important;
+    background-position: top !important;
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+.capabilities-hero .row{
+    position: relative;
+    top: 35px;
+}
+
+/* Breadcrumb Styles */
+.breadcrumb {
+    background: transparent;
+    padding: 0;
+    font-weight: 600;
+    font-size: 1.1rem;
+    top: 20px;
+}
+
+@media (max-width:768px){
+    .breadcrumb {
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+
+}
+
+.breadcrumb a{
+    text-decoration: none;
+}
+
+.breadcrumb-item.active {
+    color: var(--secBule);
+}
+
+.capabilities-hero .breadcrumb-item + .breadcrumb-item::before {
+    color: rgba(255, 255, 255, 0.5);
+    content: ">";
+}
+
+/* strat equipment */
+.equipment-section{
+    background-color: var(--background-section);
+}
+.equipment-section h2{
+    color: var(--Blue-color);
+}
+
+/* Equipment Cards */
+.equipment-card {
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
+
+.equipment-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+}
+
+.equipment-img {
+    height: 250px;
+    overflow: hidden;
+}
+
+.equipment-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.equipment-card:hover .equipment-img img {
+    transform: scale(1.05);
+}
+
+.equipment-content h3 {
+    color: var(--Blue-color);
+}
+
+.equipment-specs {
+    list-style: none;
+    padding: 0;
+}
+
+.equipment-specs li {
+    margin-bottom: 0.5rem;
+    position: relative;
+    padding-left: 0;
+}
+
+/* Process Cards */
+.process-card {
+    background: rgba(255,255,255,0.1);
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.process-card:hover {
+    background: rgba(255,255,255,0.2);
+    transform: translateY(-5px);
+}
+
+.process-icon {
+    width: 80px;
+    height: 80px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Material Styles */
+.material-section{
+    background-color: var(--background-section);
+}
+
+.material-section h2{
+    color: var(--Blue-color);
+}
+
+.material-card {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.material-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+}
+
+.material-item {
+    transition: all 0.3s ease;
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+.material-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 7px 15px rgba(0,0,0,0.1);
+    border-color: rgba(0,0,0,0.1);
+}
+
+.material-item i {
+    transition: all 0.3s ease;
+    font-size: 1.5rem;
+}
+
+.material-item:hover i {
+    transform: scale(1.2);
+}
+
+/* Color Scheme */
+:root {
+    --metal-color: #0eb0ee;  /* Blue for metals */
+    --plastic-color: rgb(48, 53, 93); /* Green for plastics */
+}
+
+.border-primary {
+    border-color: var(--metal-color) !important;
+}
+
+.border-success {
+    border-color: var(--plastic-color) !important;
+}
+
+.text-primary {
+    color: var(--metal-color) !important;
+}
+
+.text-success {
+    color: var(--plastic-color) !important;
+}
+
+/* Quality Section */
+.quality-icon {
+    color: var(--secBule);
+}
+
+.quality-section h2{
+    color: var(--Blue-color);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .capabilities-hero {
+        height: 50vh;
+    }
+    
+    .capabilities-hero h1 {
+        font-size: 2.5rem;
+    }
+    
+    .equipment-img {
+        height: 200px;
+    }
+}
