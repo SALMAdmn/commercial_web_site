@@ -1,3 +1,6 @@
+<?php
+session_start(); // Toujours démarrer la session en haut de la page
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>

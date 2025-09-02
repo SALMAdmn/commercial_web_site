@@ -1,4 +1,7 @@
 <?php
+session_start(); // Toujours démarrer la session en haut de la page
+?>
+<?php
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
@@ -166,10 +169,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
                     <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="index.html">Accueil</a>
+                        <a class="nav-link active" aria-current="page" href="index.php">Accueil</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="about-us.html">À propos</a>
+                        <a class="nav-link" href="apropos.php">À propos</a>
                     </li>
                     <!-- <li class="nav-item">
                         <a class="nav-link" href="capabilities.html">Our Capabilities</a>
@@ -178,10 +181,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         <a class="nav-link" href="industries.html">Industries</a>
                     </li> -->
                     <li class="nav-item">
-                        <a class="nav-link" href="case-studies.html">Produits</a>
+                        <a class="nav-link" href="produits.php">Produits</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="contact.html">Contact</a>
+                        <a class="nav-link" href="contact.php">Contact</a>
                     </li>
 
                 </ul>
@@ -193,16 +196,30 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 
 
-                <ul class="navbar-nav ms-auto mb-2 mb-lg-0 d-flex gap-2">
-                <li class="nav-item me-2">
-                    <a class="btn btn-outline-light" href="panier.html">
-                        <i class="fa-solid fa-cart-shopping"></i>
-                    </a>
-                </li>
+                    <ul class="navbar-nav ms-auto mb-2 mb-lg-0 d-flex gap-2">
+             
+                    
+                <?php if (isset($_SESSION['user_id'])): ?>
+                <a class="btn btn-outline-light" href="panier.php">
+                  <i class="fa-solid fa-cart-shopping"></i>
+                </a>
+            <?php else: ?>
+                 <a class="btn btn-outline-light" href="#" data-bs-toggle="modal" data-bs-target="#connectModal">
+                     <i class="fa-solid fa-cart-shopping"></i>
+                 </a>
+            <?php endif; ?>
+
+                
+            
+
                 <li class="nav-item">
-                    <a class="btn btn-custom" href="SignIn-SignUp-Form-main\login.php" >
-                        Se Connecter    
-                    </a>
+                    <?php if (isset($_SESSION['user_id'])): ?>
+                        <!-- Si connecté → bouton Déconnexion -->
+                        <a class="btn btn-custom" href="logout.php">Se Déconnecter</a>
+                    <?php else: ?>
+                        <!-- Si non connecté → bouton Connexion -->
+                        <a class="btn btn-custom" href="SignIn-SignUp-Form-main/login.php">Se Connecter</a>
+                    <?php endif; ?>
                 </li>
             </ul>
 
@@ -507,7 +524,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     </div>
   </div>
 </div>
-
+<!-- Modal pour connexion obligatoire -->
+<div class="modal fade" id="connectModal" tabindex="-1" aria-labelledby="connectModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="connectModalLabel">Attention</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+      </div>
+      <div class="modal-body">
+        Vous devez être connecté pour accéder au panier !
+      </div>
+      <div class="modal-footer">
+        <a href="SignIn-SignUp-Form-main/login.php" class="btn btn-primary">Se connecter</a>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 
 
