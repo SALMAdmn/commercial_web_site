@@ -200,7 +200,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="btn btn-custom" href="contact.html#quote">
+                    <a class="btn btn-custom" href="SignIn-SignUp-Form-main\login.php" >
                         Se Connecter    
                     </a>
                 </li>
@@ -508,5 +508,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   </div>
 </div>
 
+
+
+
+
+</script>
 </body>
 </html>

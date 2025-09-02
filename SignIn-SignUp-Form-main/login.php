@@ -67,10 +67,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
             // Vérifier le mot de passe
             if (password_verify($password, $user['password'])) {
-               $message = "Connexion réussie. Bienvenue " . $user['username'];
-               $type = "success";                // Tu peux démarrer une session ici
-                // session_start();
-                // $_SESSION['user'] = $user['id'];
+                 // ✅ Connexion réussie → on démarre la session et on redirige
+                session_start();
+                $_SESSION['user_id'] = $user['id'];
+                $_SESSION['username'] = $user['username'];
+
+                header("Location: ../index.html");
+            exit();
             } else {
 
                 $message = "Mot de passe incorrect.";
@@ -189,7 +192,7 @@ $conn->close();
             <div class="content">
                 <h3>Déjà parmi nous ?</h3>
                 <p>Connectez-vous pour accéder à votre compte et profiter de toutes nos fonctionnalités. </p>
-                <button class="btn transparent" id="sign-in-btn">Se connecter</button>
+                <button class="btn transparent" id="sign-in-btn">Connecter</button>
             </div>
             <img src="./img/register.svg" class="image" alt="">
         </div>
