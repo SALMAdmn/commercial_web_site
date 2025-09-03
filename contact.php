@@ -155,7 +155,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <nav class="navbar navbar-expand-lg">
         <div class="container">
             
-            <a class="navbar-brand text-light"  href="index.html">
+            <a class="navbar-brand text-light"  href="index.php">
                 <h4  data-aos="fade-down">INOX INDUSTRIE</h4>
             </a>
             
@@ -169,7 +169,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
                     <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="index.php">Accueil</a>
+                        <a class="nav-link" aria-current="page" href="index.php">Accueil</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="apropos.php">À propos</a>
@@ -184,7 +184,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         <a class="nav-link" href="produits.php">Produits</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="contact.php">Contact</a>
+                        <a class="nav-link active" href="contact.php">Contact</a>
                     </li>
 
                 </ul>
@@ -543,9 +543,28 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   </div>
 </div>
 
+<!-- Modal pour connexion obligatoire -->
+<div class="modal fade" id="connectModal" tabindex="-1" aria-labelledby="connectModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="connectModalLabel">Attention</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+      </div>
+      <div class="modal-body">
+        Vous devez être connecté pour accéder au panier !
+      </div>
+      <div class="modal-footer">
+        <a href="SignIn-SignUp-Form-main/login.php" class="btn btn-primary">Se connecter</a>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 
 
-</script>
+
+
 </body>
 </html>

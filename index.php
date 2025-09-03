@@ -86,7 +86,7 @@ session_start(); // Toujours démarrer la session en haut de la page
     <nav class="navbar navbar-expand-lg">
         <div class="container">
             
-            <a class="navbar-brand text-light"  href="index.html">
+            <a class="navbar-brand text-light"  href="index.php">
                 <h4  data-aos="fade-down">INOX INDUSTRIE</h4>
             </a>
             
@@ -100,10 +100,10 @@ session_start(); // Toujours démarrer la session en haut de la page
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
                     <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="index.html">Accueil</a>
+                        <a class="nav-link active" aria-current="page" href="index.php">Accueil</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="about-us.html">À propos</a>
+                        <a class="nav-link" href="apropos.php">À propos</a>
                     </li>
                     <!-- <li class="nav-item">
                         <a class="nav-link" href="capabilities.html">Our Capabilities</a>
@@ -112,20 +112,47 @@ session_start(); // Toujours démarrer la session en haut de la page
                         <a class="nav-link" href="industries.html">Industries</a>
                     </li> -->
                     <li class="nav-item">
-                        <a class="nav-link" href="case-studies.html">Produits</a>
+                        <a class="nav-link" href="produits.php">Produits</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="contact.html">Contact</a>
+                        <a class="nav-link" href="contact.php">Contact</a>
                     </li>
 
                 </ul>
-                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-                    <li class="nav-item">
-                        <a class="btn btn-custom" href="contact.html#quote">
-                            Get a Quote
-                        </a>
-                    </li>
-                </ul>
+                
+                      
+
+
+
+
+
+
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0 d-flex gap-2">
+             
+                    
+                <?php if (isset($_SESSION['user_id'])): ?>
+                <a class="btn btn-outline-light" href="panier.php">
+                  <i class="fa-solid fa-cart-shopping"></i>
+                </a>
+                <?php else: ?>
+                 <a class="btn btn-outline-light" href="#" data-bs-toggle="modal" data-bs-target="#connectModal">
+                     <i class="fa-solid fa-cart-shopping"></i>
+                 </a>
+                <?php endif; ?>
+
+                
+            
+
+                <li class="nav-item">
+                    <?php if (isset($_SESSION['user_id'])): ?>
+                        <!-- Si connecté → bouton Déconnexion -->
+                        <a class="btn btn-custom" href="logout.php">Se Déconnecter</a>
+                    <?php else: ?>
+                        <!-- Si non connecté → bouton Connexion -->
+                        <a class="btn btn-custom" href="SignIn-SignUp-Form-main/login.php">Se Connecter</a>
+                    <?php endif; ?>
+                </li>
+            </ul>
             </div>
         </div>
     </nav>
@@ -167,9 +194,9 @@ session_start(); // Toujours démarrer la session en haut de la page
 
         <!-- Hero Text -->
         <div class="hero-text">
-            <h1 data-aos="fade-up">Innovative Manufacturing Solutions</h1>
-            <p data-aos="fade-up" data-aos-delay="300">Delivering precision and efficiency in every product.</p>
-            <a href="contact.html" class="btn btn-custom" data-aos="fade-up" data-aos-delay="400">Contact Us</a>
+            <h1 data-aos="fade-up">Solutions de fabrication innovantes</h1>
+            <p data-aos="fade-up" data-aos-delay="300">Alliant précision et efficacité dans chacun de nos produits.</p>
+            <a href="contact.html" class="btn btn-custom" data-aos="fade-up" data-aos-delay="400">Contactez-nous</a>
         </div>
     </section>
     <!-- End Hero  -------- -->
@@ -182,24 +209,24 @@ session_start(); // Toujours démarrer la session en haut de la page
                 <div class="col-md" data-aos="fade-right">
                     <h2 class="display-5 mb-4 section-title">
                         <i class="fas fa-info-circle"></i>
-                        About Us
+                        À propos de nous
                     </h2>
                     <p class="lead mb-4 section-subtitle ">
-                        We are a leading manufacturing company specializing in high-quality industrial solutions. With state-of-the-art machinery and a dedicated team, we deliver excellence in every project.
+                        Chez Inox Industrie, nous fabriquons des symboles et articles en acier inoxydable grâce à nos machines de découpe de précision. Nous proposons des produits de haute qualité, alliant durabilité, précision et design, pour répondre aux besoins des professionnels et des particuliers.
                     </p>
-                    <a href="about-us.html" class="btn btn-custom">Learn More</a>
+                    <a href="apropos.php" class="btn btn-custom">Plus Détails</a>
                 </div>
 
                 <!-- img -->
                 <div class="col-md" data-aos="fade-left">
-                    <img src="assets/IMG/aboutus.jpg" alt="About Us Image" class="img-fluid rounded shadow">
+                    <img src="assets/IMG/88a808ae-37d2-4676-a2da-fb7c6f3aba36.jpeg" alt="About Us Image" class="img-fluid rounded shadow">
                 </div>
             </div>
 
             <!-- Why Choose Us Section -->
             <div class="why-choose-us ">
                 <h3 class="h4 mb-5 text-center">
-                    Why Choose Us?
+                    Pourquoi nous choisir?
                 </h3>
                 <div class="row g-4 ">
                     <!-- Item 1 -->
@@ -209,9 +236,9 @@ session_start(); // Toujours démarrer la session en haut de la page
                                 <i class="fas fa-cogs fa-3x text-white"></i>
                             </div>
                             <div>
-                                <h4 class="h5 mb-2">Advanced Machinery</h4>
+                                <h4 class="h5 mb-2">Technologie avancée</h4>
                                 <p class=" mb-0">
-                                    We use the latest technology to ensure precision and efficiency in every project.
+                                    Nous utilisons des machines de découpe modernes pour garantir une précision et une efficacité  dans chaque projet.
                                 </p>
                             </div>
                         </div>
@@ -224,9 +251,9 @@ session_start(); // Toujours démarrer la session en haut de la page
                                 <i class="fas fa-users fa-3x text-white"></i>
                             </div>
                             <div>
-                                <h4 class="h5 mb-2">Expert Team</h4>
+                                <h4 class="h5 mb-2">Équipe d’experts</h4>
                                 <p class=" mb-0">
-                                    Our team of professionals is dedicated to delivering top-notch results.
+                                    Notre équipe qualifiée met son savoir-faire au service de nos clients afin de fournir des résultats fiables et professionnels.
                                 </p>
                             </div>
                         </div>
@@ -239,9 +266,9 @@ session_start(); // Toujours démarrer la session en haut de la page
                                 <i class="fas fa-check-circle fa-3x text-white"></i>
                             </div>
                             <div>
-                                <h4 class="h5 mb-2">Quality Assurance</h4>
+                                <h4 class="h5 mb-2">Qualité garantie</h4>
                                 <p class=" mb-0">
-                                    Every product undergoes rigorous quality checks before delivery.
+                                    Tous nos produits font l’objet de contrôles rigoureux afin d’assurer une qualité irréprochable avant leur livraison.
                                 </p>
                             </div>
                         </div>
@@ -258,9 +285,11 @@ session_start(); // Toujours démarrer la session en haut de la page
             <div class="row mb-4 text-center">
                 <div class="col-lg-12" data-aos="fade-up">
                     <h2 class="mb-3 display-4 section-title ">
-                        <i class="fas fa-tools me-3"></i>Our Services
+                        <i class="fas fa-tools me-3"></i>Nos services
                     </h2>
-                    <p class="lead section-subtitle ">We offer a wide range of industrial services to meet your needs.</p>
+                    <p class="lead section-subtitle ">
+                        Nous offrons une large gamme de services industriels pour répondre à vos besoins.
+                    </p>
                 </div>
             </div>
 
@@ -271,9 +300,9 @@ session_start(); // Toujours démarrer la session en haut de la page
                     <div class="service-card text-center  shadow ">
                         <img class="card-img-top mb-3" src="assets/IMG/ser1.jpg" alt="Industrial Solutions" class="img-fluid">
                         <div class="card-body">
-                            <h3 class="card-title mb-3">Industrial Solutions</h3>
-                            <p class="card-text mb-4">We provide advanced industrial solutions tailored to your specific requirements.</p>
-                            <a href="service.html" class="btn btn-custom">Learn More</a>
+                            <h3 class="card-title mb-3">Fabrication sur mesure</h3>
+                            <p class="card-text mb-4">Grâce à nos machines de découpe de haute précision, nous fabriquons des symboles et pièces en acier inoxydable adaptés à vos besoins spécifiques.</p>
+                            <a href="service.html" class="btn btn-custom">Voir plus</a>
                         </div>
                     </div>
                 </div>
@@ -283,15 +312,15 @@ session_start(); // Toujours démarrer la session en haut de la page
                     <div class="service-card text-center shadow-lg">
                         <img class="card-img-top mb-3" src="assets/IMG/ser2.jpg" alt="Machinery Maintenance" class="img-fluid">
                         <div class="card-body">
-                            <h3 class="card-title mb-3">Machinery Maintenance</h3>
-                            <p class="card-text mb-4">Our team ensures your machinery operates at peak efficiency with regular maintenance.</p>
-                            <a href="service.html" class="btn btn-custom">Learn More</a>
+                            <h3 class="card-title mb-3">Articles en inox</h3>
+                            <p class="card-text mb-4">Nous proposons une large gamme d’articles en inox de qualité, alliant robustesse, design et durabilité, destinés aussi bien aux professionnels qu’aux particuliers.</p>
+                            <a href="service.html" class="btn btn-custom">Voir plus</a>
                         </div>
                     </div>
                 </div>
 
                 <!-- Service 3 -->
-                <div class="col-sm-auto col-md-4 rounded" data-aos="fade-up" data-aos-delay="300">
+                <!-- <div class="col-sm-auto col-md-4 rounded" data-aos="fade-up" data-aos-delay="300">
                     <div class="service-card text-center shadow-lg">
                         <img class="card-img-top mb-3" src="assets/IMG/ser3.jpg" alt="Quality Assurance" class="img-fluid">
                         <div class="card-body">
@@ -300,7 +329,7 @@ session_start(); // Toujours démarrer la session en haut de la page
                             <a href="service.html" class="btn btn-custom">Learn More</a>
                         </div>
                     </div>
-                </div>
+                </div> -->
             </div>
         </div>
     </section>
@@ -313,13 +342,12 @@ session_start(); // Toujours démarrer la session en haut de la page
                 <div class="col-lg-12">
                     <div class="contact-index-text text-center">
                         <h2 class="display-4">
-                            <i class="fas fa-headset me-3"></i>Any Inquiry? Feel Free To Contact Us.
+                            <i class="fas fa-headset me-3"></i>Des questions ? N'hésitez pas à nous contacter.
                         </h2>
                         <p class="text-light mb-4">
-                            We are here to help you with any questions or concerns you may have.
-                        </p>
+                           Nous sommes là pour vous aider à répondre à toutes vos questions ou préoccupations.                        </p>
                         <a href="contact.html" class="btn btn-custom shadow" data-aos="fade-up" data-aos-delay="200">
-                            <span class="me-2">Contact Us</span>
+                            <span class="me-2">Contactez-nous</span>
                             <i class="fas fa-arrow-right"></i>
                         </a>
                     </div>
@@ -329,16 +357,16 @@ session_start(); // Toujours démarrer la session en haut de la page
     </section>
 
     <!-- Start Blogs  -------- -->
-    <section class="blogs-sec ">
+    <!-- <section class="blogs-sec ">
         <div class="container">
             <div class="row text-center">
                 <h2 class="mb-3 display-4 mb-5 section-title" data-aos="fade-up">
                     <i class="fas fa-newspaper me-3"></i>Latest Blogs
                 </h2>
             </div>
-            <div class="row g-5 justify-content-center align-items-center">
+            <div class="row g-5 justify-content-center align-items-center"> -->
                  <!-- Blog 1 -->
-                <div class="col-sm-6 col-md-4" data-aos="fade-up" data-aos-delay="100">
+                <!-- <div class="col-sm-6 col-md-4" data-aos="fade-up" data-aos-delay="100">
                     <div class="card-blogs card  rounded">
                         <div class="icon-wrap">
                             <img class="rounded" src="assets/IMG/ser1.jpg" alt="Blog Image 1">
@@ -358,9 +386,9 @@ session_start(); // Toujours démarrer la session en haut de la page
                             </a>
                         </div>
                     </div>
-                </div>
+                </div> -->
                  <!-- Blog 2 -->
-                <div class="col-sm-6 col-md-4" data-aos="fade-up" data-aos-delay="200">
+                <!-- <div class="col-sm-6 col-md-4" data-aos="fade-up" data-aos-delay="200">
                     <div class="card-blogs card rounded">
                         <div class="icon-wrap">
                                 <img class="rounded" src="assets/IMG/ser5.jpg" alt="Blog Image 2">
@@ -380,9 +408,9 @@ session_start(); // Toujours démarrer la session en haut de la page
                             </a>
                         </div>
                     </div>
-                </div>
+                </div> -->
                 <!-- Blog 3 -->
-                <div class="col-sm-6 col-md-4" data-aos="fade-up" data-aos-delay="400">
+                <!-- <div class="col-sm-6 col-md-4" data-aos="fade-up" data-aos-delay="400">
                     <div class="card-blogs card rounded">
                         <div class="icon-wrap">
                                 <img class="rounded" src="assets/IMG/ser3.jpg" alt="Blog Image 3">
@@ -406,11 +434,11 @@ session_start(); // Toujours démarrer la session en haut de la page
           
             </div>
         </div>
-    </section>
+    </section> -->
     <!-- End Blogs  -------- -->
 
         <!-- Manufacturing Projects Section -->
-    <section class="manufacturing-projects py-5">
+    <!-- <section class="manufacturing-projects py-5">
         <div class="container-fluid">
             <div class="row mb-5">
                 <div class="col-12 text-center" data-aos="fade-up">
@@ -423,8 +451,9 @@ session_start(); // Toujours démarrer la session en haut de la page
             </div>
             
             <div class="row g-2">
-                <!-- Project 1 -->
-                <div class="col-lg-4 col-md-6">
+
+
+            <div class="col-lg-4 col-md-6">
                     <a href="service.html">
                         <div class="project-card">
                             <div class="project-img">
@@ -443,7 +472,8 @@ session_start(); // Toujours démarrer la session en haut de la page
                     </a>
                 </div>
                 
-                <!-- Project 2 -->
+
+
                 <div class="col-lg-4 col-md-6">
                     <a href="service.html">
                         <div class="project-card">
@@ -463,7 +493,8 @@ session_start(); // Toujours démarrer la session en haut de la page
                     </a>
                 </div>
                 
-                <!-- Project 3 -->
+
+
                 <div class="col-lg-4 col-md-6">
                     <a href="service.html">
                         <div class="project-card">
@@ -483,7 +514,6 @@ session_start(); // Toujours démarrer la session en haut de la page
                     </a>
                 </div>
                 
-                <!-- Card 1: CNC Machining -->
                 <div class="col-lg-4 col-md-6">
                     <a href="service.html">
                         <div class="project-card">
@@ -503,7 +533,6 @@ session_start(); // Toujours démarrer la session en haut de la page
                     </a>
                 </div>
 
-                <!-- Card 2: Metal Fabrication -->
                 <div class="col-lg-4 col-md-6">
                     <a href="service.html">
                         <div class="project-card">
@@ -523,7 +552,6 @@ session_start(); // Toujours démarrer la session en haut de la page
                     </a>
                 </div>
 
-                <!-- Card 3: Prototyping -->
                 <div class="col-lg-4 col-md-6">
                     <a href="service.html">
                         <div class="project-card">
@@ -544,7 +572,7 @@ session_start(); // Toujours démarrer la session en haut de la page
                 </div>
             </div>
         </div>
-    </section>
+    </section> -->
 
     <!-- Case Studies Section -->
     <section class="case-studies py-5">
@@ -553,9 +581,9 @@ session_start(); // Toujours démarrer la session en haut de la page
                 <div class="col-12" data-aos="fade-up">
                     <h2 class="display-4 mb-3 section-title">
                         <i class="fas fa-medal me-3"></i>
-                        Success Stories
+                        Histoires de réussite
                     </h2>
-                    <p class="section-subtitle">Discover how we've helped industry leaders achieve their manufacturing goals</p>
+                    <p class="section-subtitle">Découvrez comment nous avons aidé les leaders de l'industrie à atteindre leurs objectifs de fabrication</p>
                 </div>
             </div>
             
@@ -565,12 +593,12 @@ session_start(); // Toujours démarrer la session en haut de la page
                         <!-- Case 1 -->
                         <div class="case-card item mx-auto">
                             <div class="case-img card-img-top">
-                                <img src="assets/IMG/st1.jpg" alt="Automotive Solutions" class="img-fluid">
-                                <div class="case-badge">Automotive</div>
+                                <img src="assets/IMG/st1.jpeg" alt="Automotive Solutions" class="img-fluid">
+                                <div class="case-badge">Artisanat</div>
                             </div>
                             <div class="case-content">
-                                <h3>Automotive Assembly Line</h3>
-                                <p class="text-muted">Reduced production time by 40% for leading car manufacturer</p>
+                                <h3>Symboles personnalisés</h3>
+                                <p class="text-muted">Nous avons conçu et fabriqué des symboles en inox sur mesure pour une entreprise industrielle, améliorant la visibilité et la durabilité de leurs installations.</p>
                                 <div class="results">
                                     <div class="result-item">
                                         <i class="fas fa-chart-line text-primary"></i>
@@ -578,10 +606,9 @@ session_start(); // Toujours démarrer la session en haut de la page
                                     </div>
                                     <div class="result-item">
                                         <i class="fas fa-dollar-sign text-primary"></i>
-                                        <span>$2M Saved</span>
+                                        <span>1000DH Économisés </span>
                                     </div>
                                 </div>
-                                <a href="service.html" class="btn btn-outline-primary mt-3">Read Full Study</a>
                             </div>
                         </div>
                         
@@ -589,45 +616,43 @@ session_start(); // Toujours démarrer la session en haut de la page
                         <div class="case-card item mx-auto">
                             <div class="case-img card-img-top">
                                 <img src="assets/IMG/st2.jpg" alt="Aerospace Components" class="img-fluid">
-                                <div class="case-badge">Aerospace</div>
+                                <div class="case-badge">Restauration</div>
                             </div>
                             <div class="case-content">
-                                <h3>Aerospace Components</h3>
-                                <p class="text-muted">Precision machining for critical aircraft parts</p>
+                                <h3>Articles inox pour la restauration</h3>
+                                <p class="text-muted">Un restaurant a choisi nos accessoires inox pour équiper sa cuisine, gagnant en hygiène et en durabilité.</p>
                                 <div class="results">
                                     <div class="result-item">
                                         <i class="fas fa-tachometer-alt text-primary"></i>
-                                        <span>99.9% Accuracy</span>
+                                        <span> +20% Efficacité</span>
                                     </div>
                                     <div class="result-item">
                                         <i class="fas fa-calendar-check text-primary"></i>
-                                        <span>On-Time Delivery</span>
+                                        <span>700DH de coûts réduits</span>
                                     </div>
                                 </div>
-                                <a href="service.html" class="btn btn-outline-primary mt-3">Read Full Study</a>
                             </div>
                         </div>
                         
                         <!-- Case 3 -->
                         <div class="case-card item mx-auto">
                             <div class="case-img card-img-top">
-                                <img src="assets/IMG/st3.jpg" alt="Medical Equipment" class="img-fluid">
-                                <div class="case-badge">Medical</div>
+                                <img src="assets/IMG/st3.jpeg" alt="Medical Equipment" class="img-fluid">
+                                <div class="case-badge">Éducation</div>
                             </div>
                             <div class="case-content">
-                                <h3>Medical Device Manufacturing</h3>
-                                <p class="text-muted">Sterile production environment for surgical instruments</p>
+                                <h3>Découpe inox pour un projet d’ingénierie</h3>
+                                <p class="text-muted">Nous avons produit des pièces inox pour un prototype étudiant, livrées rapidement et parfaitement conformes aux plans.</p>
                                 <div class="results">
                                     <div class="result-item">
                                         <i class="fas fa-certificate text-primary"></i>
-                                        <span>ISO 13485 Certified</span>
+                                        <span>+40% Gain de temps</span>
                                     </div>
                                     <div class="result-item">
                                         <i class="fas fa-clock text-primary"></i>
-                                        <span>50% Faster Prototyping</span>
+                                        <span>+15% Précision des pièces par rapport aux plans</span>
                                     </div>
                                 </div>
-                                <a href="service.html" class="btn btn-outline-primary mt-3">Read Full Study</a>
                             </div>
                         </div>
 
@@ -635,27 +660,26 @@ session_start(); // Toujours démarrer la session en haut de la page
                         <div class="case-card item mx-auto">
                             <div class="case-img card-img-top">
                                 <img src="assets/IMG/banner2.jpg" alt="Industrial Machinery" class="img-fluid">
-                                <div class="case-badge">Industrial</div>
+                                <div class="case-badge">Décoration</div>
                             </div>
                             <div class="case-content">
-                                <h3>Heavy Machinery Parts</h3>
-                                <p class="text-muted">Durable components for construction equipment</p>
+                                <h3>Création d’accessoires décoratifs en inox</h3>
+                                <p class="text-muted">Nous avons conçu et fabriqué une série de petits accessoires inox pour un designer d’intérieur, alliant design moderne et durabilité.</p>
                                 <div class="results">
                                     <div class="result-item">
                                         <i class="fas fa-cogs text-primary"></i>
-                                        <span>200% Durability</span>
+                                        <span> +25% Esthétique perçue</span>
                                     </div>
                                     <div class="result-item">
                                         <i class="fas fa-hammer text-primary"></i>
-                                        <span>Impact Resistant</span>
+                                        <span>+30% Satisfaction client</span>
                                     </div>
                                 </div>
-                                <a href="service.html" class="btn btn-outline-primary mt-3">View Project</a>
                             </div>
                         </div>
                         
                         <!-- Case 5 - Energy -->
-                        <div class="case-card item mx-auto">
+                        <!-- <div class="case-card item mx-auto">
                             <div class="case-img card-img-top">
                                 <img src="assets/IMG/st5.jpg" alt="Energy Sector" class="img-fluid">
                                 <div class="case-badge">Energy</div>
@@ -675,7 +699,7 @@ session_start(); // Toujours démarrer la session en haut de la page
                                 </div>
                                 <a href="service.html" class="btn btn-outline-primary mt-3">View Project</a>
                             </div>
-                        </div>
+                        </div> -->
                     </div>
                 </div>
             </div>
@@ -816,5 +840,29 @@ session_start(); // Toujours démarrer la session en haut de la page
             });
         });
     </script>
+
+
+
+
+    <!-- Modal pour connexion obligatoire -->
+<div class="modal fade" id="connectModal" tabindex="-1" aria-labelledby="connectModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="connectModalLabel">Attention</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+      </div>
+      <div class="modal-body">
+        Vous devez être connecté pour accéder au panier !
+      </div>
+      <div class="modal-footer">
+        <a href="SignIn-SignUp-Form-main/login.php" class="btn btn-primary">Se connecter</a>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 </body>
 </html>

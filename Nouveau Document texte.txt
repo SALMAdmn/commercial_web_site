@@ -68,3 +68,17 @@
 
 
 Pour gérer ce type de comportement dynamique, il faut un langage côté client ou côté serveur capable de détecter si l’utilisateur est connecté et de modifier l’affichage ou les liens en conséquence. Voici une explication complète
+
+
+
+
+
+
+Ctrl + Shift + R pour resoudre les dossier cacher dan chrome
+Pourquoi tu voyais toujours l’ancienne image
+
+Quand tu as remplacé logo.png par un nouveau fichier avec le même nom :
+
+Le navigateur a dit : « j’ai déjà logo.png dans mon cache, pas besoin de le redemander au serveur ».
+
+Résultat → il t’a montré l’ancienne version de l’image.

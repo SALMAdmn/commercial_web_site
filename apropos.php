@@ -1,3 +1,6 @@
+<?php
+session_start(); // Toujours démarrer la session en haut de la page
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -78,11 +81,12 @@
     <!-- End Header  -------- -->
 
     <!-- Start NavBAr  -------- -->
+
     <nav class="navbar navbar-expand-lg">
         <div class="container">
             
-            <a class="navbar-brand text-light"  href="index.html">
-                <h1  data-aos="fade-down">Elite</h1>
+            <a class="navbar-brand text-light"  href="index.php">
+                <h4  data-aos="fade-down">INOX INDUSTRIE</h4>
             </a>
             
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
@@ -95,32 +99,63 @@
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
                     <li class="nav-item">
-                        <a class="nav-link" aria-current="page" href="index.html">Home</a>
+                        <a class="nav-link" aria-current="page" href="index.php">Accueil</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" href="about-us.html">About Us</a>
+                        <a class="nav-link  active" href="apropos.php">À propos</a>
                     </li>
-                    <li class="nav-item">
+                    <!-- <li class="nav-item">
                         <a class="nav-link" href="capabilities.html">Our Capabilities</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="industries.html">Industries</a>
+                    </li> -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="produits.php">Produits</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="case-studies.html">Case Studies</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="contact.html">Contact Us</a>
+                        <a class="nav-link" href="contact.php">Contact</a>
                     </li>
 
                 </ul>
-                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-                    <li class="nav-item">
-                        <a class="btn btn-custom" href="contact.html#quote">
-                            Get a Quote
-                        </a>
-                    </li>
-                </ul>
+                
+                      
+
+
+
+
+
+
+                    <ul class="navbar-nav ms-auto mb-2 mb-lg-0 d-flex gap-2">
+             
+                    
+                <?php if (isset($_SESSION['user_id'])): ?>
+                <a class="btn btn-outline-light" href="panier.php">
+                  <i class="fa-solid fa-cart-shopping"></i>
+                </a>
+            <?php else: ?>
+                 <a class="btn btn-outline-light" href="#" data-bs-toggle="modal" data-bs-target="#connectModal">
+                     <i class="fa-solid fa-cart-shopping"></i>
+                 </a>
+            <?php endif; ?>
+
+                
+            
+
+                <li class="nav-item">
+                    <?php if (isset($_SESSION['user_id'])): ?>
+                        <!-- Si connecté → bouton Déconnexion -->
+                        <a class="btn btn-custom" href="logout.php">Se Déconnecter</a>
+                    <?php else: ?>
+                        <!-- Si non connecté → bouton Connexion -->
+                        <a class="btn btn-custom" href="SignIn-SignUp-Form-main/login.php">Se Connecter</a>
+                    <?php endif; ?>
+                </li>
+            </ul>
+
+
+
+            
             </div>
         </div>
     </nav>
@@ -131,12 +166,12 @@
         <div class="container h-100">
             <div class="row h-100 align-items-center">
                 <div class="col-12 text-center">
-                    <h1 class="display-3 text-white mb-4" data-aos="fade-down">About Us</h1>
+                    <h1 class="display-3 text-white mb-4" data-aos="fade-down">À propos</h1>
                     
                     <nav aria-label="breadcrumb" data-aos="fade-up" data-aos-delay="200">
                         <ol class="breadcrumb justify-content-center ">
-                            <li class="breadcrumb-item"><a href="index.html" class="text-light">Home</a></li>
-                            <li class="breadcrumb-item active" aria-current="page">About Us</li>
+                            <li class="breadcrumb-item"><a href="index.html" class="text-light">Accueil</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">À propos</li>
                         </ol>
                     </nav>
                     
@@ -151,28 +186,28 @@
             <div class="row align-items-center">
                 
                 <div class="col-lg-6 mb-4 mb-lg-0" data-aos="fade-right">
-                    <h2 class="display-4 mb-4 ">Our Story</h2>
-                    <p class="lead">Founded in 1995, Elite Machinery began as a small workshop with big ambitions.</p>
-                    <p>Today, we're a leading manufacturer of precision industrial components, serving clients across 15 countries. Our journey has been marked by continuous innovation, investment in cutting-edge technology, and an unwavering commitment to quality.</p>
+                    <h2 class="display-4 mb-4 ">Notre histoire</h2>
+                    <p class="lead">Fondée en 2013, Inox Industrie a démarré comme une petite société familiale spécialisée dans l’acier inoxydable. Avec une vision claire : offrir des produits de qualité, durables et adaptés aux besoins du marché marocain.</p>
+                    <p>Aujourd’hui, nous sommes un acteur reconnu à El Jadida, fournissant des symboles, pièces et articles en inox pour différents secteurs tels que l’artisanat, la restauration, la décoration et l’industrie. Notre parcours est marqué par la précision de nos découpes, l’innovation dans nos procédés et un engagement constant envers la satisfaction de nos clients.</p>
                     
                     <div class="achievements mt-4">
                         <div class="row">
                             <div class="col col-sm-4 mb-3">
                                 <div class="achievement-box p-2 p-sm-3 text-center bg-white shadow-sm">
-                                    <h3 class=" mb-0" data-target="50" data-suffix="+">0</h3>
-                                    <p class="mb-0">Years Experience</p>
+                                    <h3 class=" mb-0" data-target="10" data-suffix="+">0</h3>
+                                    <p class="mb-0">Années d’expérience</p>
                                 </div>
                             </div>
                             <div class="col col-sm-4 mb-3">
                                 <div class="achievement-box p-2 p-sm-3 text-center bg-white shadow-sm">
-                                    <h3 class=" mb-0" data-target="500" data-suffix="+">0</h3>
-                                    <p class="mb-0">Clients Worldwide</p>
+                                    <h3 class=" mb-0" data-target="100" data-suffix="+">0</h3>
+                                    <p class="mb-0">Clients au Maroc</p>
                                 </div>
                             </div>
                             <div class="col col-sm-4 mb-3">
                                 <div class="achievement-box p-2 p-sm-3 text-center bg-white shadow-sm">
-                                    <h3 class=" mb-0" data-target="6000" data-suffix="+">0</h3>
-                                    <p class="mb-0">Employee</p>
+                                    <h3 class=" mb-0" data-target="10" data-suffix="+">0</h3>
+                                    <p class="mb-0">Collaborateurs engagés</p>
                                 </div>
                             </div>
                         </div>
@@ -191,8 +226,8 @@
         <div class="container">
             <div class="row">
                 <div class="col-12 text-center mb-5">
-                    <h2 class="display-4 mb-3">Our Core Values</h2>
-                    <p class="lead">What drives us forward</p>
+                    <h2 class="display-4 mb-3">Nos valeurs</h2>
+                    <p class="lead">Ce qui nous guide chaque jour</p>
                 </div>
             </div>
             <div class="row">
@@ -202,8 +237,8 @@
                         <div class="icon-container mb-4">
                             <i class="fas fa-bullseye fa-3x text-primary"></i>
                         </div>
-                        <h3 class="mb-3">Our Mission</h3>
-                        <p>To deliver precision-engineered manufacturing solutions that empower industries to achieve their highest potential through innovative technology, uncompromising quality, and exceptional service.</p>
+                        <h3 class="mb-3">Notre mission</h3>
+                        <p>Fournir des solutions en acier inoxydable de haute qualité, alliant précision, durabilité et design, afin d’accompagner nos clients – professionnels comme particuliers – dans la réussite de leurs projets.</p>
                     </div>
                 </div>
                 
@@ -213,8 +248,8 @@
                         <div class="icon-container mb-4">
                             <i class="fas fa-eye fa-3x text-primary"></i>
                         </div>
-                        <h3 class="mb-3">Our Vision</h3>
-                        <p>To be the global benchmark for industrial manufacturing excellence, recognized for our technological leadership, sustainable practices, and transformative impact on the manufacturing sector.</p>
+                        <h3 class="mb-3">Notre vision</h3>
+                        <p>Devenir une référence nationale dans le domaine de l’inox, reconnue pour notre savoir-faire, la fiabilité de nos produits et l’innovation dans nos procédés de fabrication.</p>
                     </div>
                 </div>
             </div>
@@ -226,8 +261,8 @@
         <div class="container-fluid container-lg">
             <div class="row">
                 <div class="col-12 text-center mb-5">
-                    <h2 class="display-4 mb-3">Why Choose Elite Machinery?</h2>
-                    <p class="lead">The competitive advantages that set us apart</p>
+                    <h2 class="display-4 mb-3">Pourquoi choisir Inox Industrie ?</h2>
+                    <p class="lead">Les atouts qui nous distinguent</p>
                 </div>
             </div>
 
@@ -238,8 +273,8 @@
                         <div class="icon-container mx-auto mb-4 bg-white">
                             <i class="fas fa-cogs fa-3x text-primary"></i>
                         </div>
-                        <h4 class="mb-3">Advanced Technology</h4>
-                        <p>State-of-the-art CNC machines and automated production lines ensuring precision and efficiency.</p>
+                        <h4 class="mb-3">Machines de pointe</h4>
+                        <p>Grâce à nos équipements modernes de découpe et façonnage, nous garantissons une précision optimale et une finition irréprochable.</p>
                     </div>
                 </div>
                 
@@ -249,8 +284,8 @@
                         <div class="icon-container mx-auto mb-4 bg-white">
                             <i class="fas fa-certificate fa-3x text-primary"></i>
                         </div>
-                        <h4 class="mb-3">Quality Certified</h4>
-                        <p>ISO 9001:2015 certified processes with rigorous quality control at every production stage.</p>
+                        <h4 class="mb-3">Qualité assurée</h4>
+                        <p>Chaque pièce en inox est soumise à un contrôle rigoureux, afin d’offrir des produits fiables et durables.</p>
                     </div>
                 </div>
                 
@@ -260,8 +295,8 @@
                         <div class="icon-container mx-auto mb-4 bg-white">
                             <i class="fas fa-users fa-3x text-primary"></i>
                         </div>
-                        <h4 class="mb-3">Expert Team</h4>
-                        <p>Highly skilled engineers and technicians with decades of combined industry experience.</p>
+                        <h4 class="mb-3">Équipe qualifiée</h4>
+                        <p>Notre équipe passionnée et expérimentée met son savoir-faire au service de vos projets, du plus simple au plus complexe.</p>
                     </div>
                 </div>
                 
@@ -271,8 +306,8 @@
                         <div class="icon-container mx-auto mb-4 bg-white">
                             <i class="fas fa-leaf fa-3x text-primary"></i>
                         </div>
-                        <h4 class="mb-3">Sustainable Practices</h4>
-                        <p>Eco-friendly manufacturing processes that minimize environmental impact.</p>
+                        <h4 class="mb-3">Flexibilité et proximité</h4>
+                        <p>En tant qu’entreprise locale à El Jadida, nous offrons un service personnalisé, adapté aux besoins spécifiques de chaque client.</p>
                     </div>
                 </div>
             </div>
@@ -280,7 +315,7 @@
     </section>
 
     <!-- Our Team -->
-    <section class="py-5 bg-white team">
+    <!-- <section class="py-5 bg-white team">
         <div class="container-fluid container-lg">
             <div class="row">
                 <div class="col-12 text-center mb-5">
@@ -289,7 +324,6 @@
                 </div>
             </div>
             <div class="row">
-                <!-- Team Member 1 -->
                 <div class="col-sm-6 col-md-3 mb-4" data-aos="fade-up">
                     <div class="team-member text-center">
                         <div class="team-img mb-3 overflow-hidden">
@@ -305,7 +339,6 @@
                     </div>
                 </div>
                 
-                <!-- Team Member 2 -->
                 <div class="col-sm-6 col-md-3 mb-4" data-aos="fade-up" data-aos-delay="100">
                     <div class="team-member text-center">
                         <div class="team-img mb-3 overflow-hidden">
@@ -321,7 +354,6 @@
                     </div>
                 </div>
                 
-                <!-- Team Member 3 -->
                 <div class="col-sm-6 col-md-3 mb-4" data-aos="fade-up" data-aos-delay="200">
                     <div class="team-member text-center">
                         <div class="team-img mb-3 overflow-hidden">
@@ -337,7 +369,6 @@
                     </div>
                 </div>
                 
-                <!-- Team Member 4 -->
                 <div class="col-sm-6 col-md-3 mb-4" data-aos="fade-up" data-aos-delay="300">
                     <div class="team-member text-center">
                         <div class="team-img mb-3 overflow-hidden">
@@ -354,7 +385,7 @@
                 </div>
             </div>
         </div>
-    </section>
+    </section> -->
 
     <!-- Footer Section -->
     <footer class="footer-area pt-5 px-3 pb-3">
@@ -509,5 +540,27 @@
             }
         }
     </script>
+
+
+    <!-- Modal pour connexion obligatoire -->
+<div class="modal fade" id="connectModal" tabindex="-1" aria-labelledby="connectModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="connectModalLabel">Attention</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+      </div>
+      <div class="modal-body">
+        Vous devez être connecté pour accéder au panier !
+      </div>
+      <div class="modal-footer">
+        <a href="SignIn-SignUp-Form-main/login.php" class="btn btn-primary">Se connecter</a>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 </body>
 </html>
