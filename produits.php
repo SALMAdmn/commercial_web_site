@@ -1,6 +1,44 @@
 <?php
 session_start(); // Toujours démarrer la session en haut de la page
 ?>
+<?php
+
+// Connexion à la base de données
+$conn = new mysqli("localhost", "root", "", "inox_industrie");
+if($conn->connect_error){
+    die("Connexion échouée : " . $conn->connect_error);
+}
+
+// ----------------------
+// 1️⃣ Ajouter un produit au panier
+// ----------------------
+if(isset($_GET['add_cart'])){
+    $product_id = $_GET['add_cart'];
+
+    // Créer le panier si il n'existe pas
+    if(!isset($_SESSION['panier'])){
+        $_SESSION['panier'] = array();
+    }
+
+    // Ajouter le produit ou augmenter la quantité
+    if(isset($_SESSION['panier'][$product_id])){
+        $_SESSION['panier'][$product_id] += 1;
+    } else {
+        $_SESSION['panier'][$product_id] = 1;
+    }
+
+    // Redirection pour éviter le doublon à la recharge
+    header("Location: produits.php");
+    exit();
+}
+
+// ----------------------
+// 2️⃣ Récupérer tous les produits pour l'affichage
+// ----------------------
+$sql = "SELECT * FROM produits";
+$result = $conn->query($sql);
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -208,7 +246,7 @@ session_start(); // Toujours démarrer la session en haut de la page
             <div class="row">
             
                 <!-- Case Study 1 -->
-                <div class="col-lg-4 col-md-6 mb-4" data-aos="fade-up" data-category="automotive">
+                <!-- <div class="col-lg-4 col-md-6 mb-4" data-aos="fade-up" data-category="automotive">
                     <div class="case-study-card">
                         
                         <div class="case-study-img">
@@ -232,207 +270,51 @@ session_start(); // Toujours démarrer la session en haut de la page
                             <a href="service.html" class="btn btn-custom">View Full Case Study</a>
                         </div>
                     </div>
-                </div>
+                </div> -->
+                <?php
+$conn = new mysqli("localhost", "root", "", "inox_industrie");
+if($conn->connect_error){ die("Connexion échouée : " . $conn->connect_error); }
 
-                <!-- Case Study 2 -->
-                <div class="col-lg-4 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="100" data-category="aerospace">
-                    <div class="case-study-card">
-                        <div class="case-study-img">
-                            <img src="assets/IMG/st2.jpg" alt="Aerospace Case Study" class="img-fluid">
-                            <div class="case-study-badge">Aerospace</div>
+$sql = "SELECT * FROM produits";
+$result = $conn->query($sql);
+?>
+
+<h2>Nos Produits</h2>
+<div class="row">
+<?php
+if($result->num_rows > 0){
+    while($row = $result->fetch_assoc()){
+        echo '
+        <div class="col-lg-4 col-md-6 mb-4" data-aos="fade-up" data-category="'.$row['categorie'].'">
+            <div class="case-study-card">
+                <div class="case-study-img">
+                    <img src="assets/IMG/'.$row['image'].'" alt="'.$row['nom'].'" class="img-fluid">
+                    <div class="case-study-badge">'.$row['categorie'].'</div>
+                </div>
+                <div class="case-study-content">
+                    <h3>'.$row['nom'].'</h3>
+                    <p class="case-study-excerpt">'.$row['description'].'</p>
+                    <div class="case-study-results">
+                        <div class="result-item">
+                            <i class="fas fa-dollar-sign"></i>
+                            <span>Prix : '.$row['prix'].'</span>
                         </div>
-                        <div class="case-study-content">
-                            <h3>Aircraft Component Manufacturing</h3>
-                            <p class="case-study-excerpt">Precision machining for critical flight components with 99.9% accuracy</p>
-                            <div class="case-study-results">
-                                <div class="result-item">
-                                    <i class="fas fa-tachometer-alt"></i>
-                                    <span>99.9% Accuracy</span>
-                                </div>
-                                <div class="result-item">
-                                    <i class="fas fa-calendar-check"></i>
-                                    <span>100% On-Time Delivery</span>
-                                </div>
-                            </div>
-                            <a href="service.html" class="btn btn-custom">View Full Case Study</a>
+                        <div class="result-item">
+                            <i class="fas fa-box"></i>
+                            <span>Stock : '.$row['stock'].'</span>
                         </div>
                     </div>
+                    <a href="produits.php?add_cart='.$row['id'].'" class="btn btn-custom">Ajouter au panier</a>
                 </div>
-
-                <!-- Case Study 3 -->
-                <div class="col-lg-4 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="200" data-category="medical">
-                    <div class="case-study-card">
-                        <div class="case-study-img">
-                            <img src="assets/IMG/st3.jpg" alt="Medical Case Study" class="img-fluid">
-                            <div class="case-study-badge">Medical</div>
-                        </div>
-                        <div class="case-study-content">
-                            <h3>Medical Device Manufacturing</h3>
-                            <p class="case-study-excerpt">Sterile production environment for surgical instruments</p>
-                            <div class="case-study-results">
-                                <div class="result-item">
-                                    <i class="fas fa-certificate"></i>
-                                    <span>ISO 13485 Certified</span>
-                                </div>
-                                <div class="result-item">
-                                    <i class="fas fa-clock"></i>
-                                    <span>50% Faster Prototyping</span>
-                                </div>
-                            </div>
-                            <a href="service.html" class="btn btn-custom">View Full Case Study</a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Case Study 4 -->
-                <div class="col-lg-4 col-md-6 mb-4" data-aos="fade-up" data-category="industrial">
-                    <div class="case-study-card">
-                        <div class="case-study-img">
-                            <img src="assets/IMG/banner2.jpg" alt="Industrial Case Study" class="img-fluid">
-                            <div class="case-study-badge">Industrial</div>
-                        </div>
-                        <div class="case-study-content">
-                            <h3>Heavy Machinery Parts</h3>
-                            <p class="case-study-excerpt">Durable components for construction equipment</p>
-                            <div class="case-study-results">
-                                <div class="result-item">
-                                    <i class="fas fa-cogs"></i>
-                                    <span>200% Durability</span>
-                                </div>
-                                <div class="result-item">
-                                    <i class="fas fa-hammer"></i>
-                                    <span>Impact Resistant</span>
-                                </div>
-                            </div>
-                            <a href="service.html" class="btn btn-custom">View Full Case Study</a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Case Study 5 -->
-                <div class="col-lg-4 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="100" data-category="energy">
-                    <div class="case-study-card">
-                        <div class="case-study-img">
-                            <img src="assets/IMG/st5.jpg" alt="Energy Case Study" class="img-fluid">
-                            <div class="case-study-badge">Energy</div>
-                        </div>
-                        <div class="case-study-content">
-                            <h3>Wind Turbine Components</h3>
-                            <p class="case-study-excerpt">High-performance parts for renewable energy</p>
-                            <div class="case-study-results">
-                                <div class="result-item">
-                                    <i class="fas fa-wind"></i>
-                                    <span>30% Efficiency Boost</span>
-                                </div>
-                                <div class="result-item">
-                                    <i class="fas fa-leaf"></i>
-                                    <span>Eco-Friendly</span>
-                                </div>
-                            </div>
-                            <a href="service.html" class="btn btn-custom">View Full Case Study</a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Case Study 6 -->
-                <div class="col-lg-4 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="200" data-category="defense">
-                    <div class="case-study-card">
-                        <div class="case-study-img">
-                            <img src="assets/IMG/in4.jpg" alt="Defense Case Study" class="img-fluid">
-                            <div class="case-study-badge">Defense</div>
-                        </div>
-                        <div class="case-study-content">
-                            <h3>Military Vehicle Components</h3>
-                            <p class="case-study-excerpt">Rugged parts for extreme conditions with enhanced durability</p>
-                            <div class="case-study-results">
-                                <div class="result-item">
-                                    <i class="fas fa-shield-alt"></i>
-                                    <span>Ballistic Protection</span>
-                                </div>
-                                <div class="result-item">
-                                    <i class="fas fa-temperature-low"></i>
-                                    <span>Extreme Temp Resistance</span>
-                                </div>
-                            </div>
-                            <a href="service.html" class="btn btn-custom">View Full Case Study</a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Case Study 7 -->
-                <div class="col-lg-4 col-md-6 mb-4" data-aos="fade-up" data-category="automotive">
-                    <div class="case-study-card">
-                        <div class="case-study-img">
-                            <img src="assets/IMG/in1.jpg" alt="Automotive Case Study" class="img-fluid">
-                            <div class="case-study-badge">Automotive</div>
-                        </div>
-                        <div class="case-study-content">
-                            <h3>Electric Vehicle Battery Housings</h3>
-                            <p class="case-study-excerpt">Lightweight yet durable enclosures for next-gen EVs</p>
-                            <div class="case-study-results">
-                                <div class="result-item">
-                                    <i class="fas fa-bolt"></i>
-                                    <span>30% Lighter</span>
-                                </div>
-                                <div class="result-item">
-                                    <i class="fas fa-fire"></i>
-                                    <span>Thermal Protection</span>
-                                </div>
-                            </div>
-                            <a href="service.html" class="btn btn-custom">View Full Case Study</a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Case Study 8 -->
-                <div class="col-lg-4 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="100" data-category="aerospace">
-                    <div class="case-study-card">
-                        <div class="case-study-img">
-                            <img src="assets/IMG/in2.jpg" alt="Aerospace Case Study" class="img-fluid">
-                            <div class="case-study-badge">Aerospace</div>
-                        </div>
-                        <div class="case-study-content">
-                            <h3>Satellite Components</h3>
-                            <p class="case-study-excerpt">Precision parts for space applications with zero tolerance</p>
-                            <div class="case-study-results">
-                                <div class="result-item">
-                                    <i class="fas fa-satellite"></i>
-                                    <span>Zero Defects</span>
-                                </div>
-                                <div class="result-item">
-                                    <i class="fas fa-weight"></i>
-                                    <span>Ultra-Lightweight</span>
-                                </div>
-                            </div>
-                            <a href="service.html" class="btn btn-custom">View Full Case Study</a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Case Study 9 -->
-                <div class="col-lg-4 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="200" data-category="medical">
-                    <div class="case-study-card">
-                        <div class="case-study-img">
-                            <img src="assets/IMG/in3.jpg" alt="Medical Case Study" class="img-fluid">
-                            <div class="case-study-badge">Medical</div>
-                        </div>
-                        <div class="case-study-content">
-                            <h3>Prosthetic Components</h3>
-                            <p class="case-study-excerpt">Custom biocompatible parts for medical prosthetics</p>
-                            <div class="case-study-results">
-                                <div class="result-item">
-                                    <i class="fas fa-user-check"></i>
-                                    <span>100% Custom Fit</span>
-                                </div>
-                                <div class="result-item">
-                                    <i class="fas fa-heartbeat"></i>
-                                    <span>Biocompatible</span>
-                                </div>
-                            </div>
-                            <a href="service.html" class="btn btn-custom ">View Full Case Study</a>
-                        </div>
-                    </div>
-                </div>
+            </div>
+        </div>';
+    }
+} else {
+    echo "<p>Aucun produit disponible pour le moment.</p>";
+}
+?>
+</div>
+     
 
             </div>
         </div>
@@ -444,9 +326,9 @@ session_start(); // Toujours démarrer la session en haut de la page
             <div class="row justify-content-center">
                
                 <div class="col-lg-8 text-center">
-                    <h2 class="text-white mb-4" data-aos="fade-up">Ready to Start Your Success Story?</h2>
-                    <p class="lead text-light mb-5" data-aos="fade-up" data-aos-delay="100">Contact us today to discuss how we can help transform your manufacturing process</p>
-                    <a href="contact.html#quote" class="btn btn-custom btn-lg" data-aos="fade-up" data-aos-delay="200">Get a Quote</a>
+                    <h2 class="text-white mb-4" data-aos="fade-up">Obtenez une estimation personnalisée</h2>
+                    <p class="lead text-light mb-5" data-aos="fade-up" data-aos-delay="100">Demandez dès aujourd’hui votre devis sur mesure et recevez une estimation claire et rapide, adaptée à vos besoins en inox.</p>
+                    <a href="contact.html#quote" class="btn btn-custom btn-lg" data-aos="fade-up" data-aos-delay="200">Obtenir un devis</a>
                 </div>
 
             </div>

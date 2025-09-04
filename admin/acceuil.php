@@ -206,7 +206,7 @@ $sql1=$sql="select * from admin where email='".$_SESSION['email']."'";
    <div class="item">
     <a class="sub-btn"><i class="fas fa-hands-helping"></i>Assistance<i class="fas fa-angle-right dropdown"></i></a>
     <div class="sub-menu">
-       <a href="ticket/mestickets.php" class="sub-item">Mes tickets</a>
+       <a href="produit/admin_add_product.php" class="sub-item">Mes tickets</a>
        <a href="ticket/touslesticket.php" class="sub-item">tickets</a>
        <a href="ticket/creerticket.php" class="sub-item">créer ticket</a>
     </div>
