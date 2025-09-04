@@ -1,4 +1,4 @@
-سؤال ممتاز 👌
+**سؤال ممتاز 👌
 
 الفرق بين **`mail()` العادية** و **PHPMailer (ou SMTP)** هو كبير جدًا، نخليك نفهمها خطوة بخطوة :
 
@@ -82,3 +82,36 @@ Quand tu as remplacé logo.png par un nouveau fichier avec le même nom :
 Le navigateur a dit : « j’ai déjà logo.png dans mon cache, pas besoin de le redemander au serveur ».
 
 Résultat → il t’a montré l’ancienne version de l’image.
+
+
+
+mon-projet/
+│
+├─ index.php                # Page d’accueil
+├─ login.php                # Page de connexion (peut rediriger vers user/admin)
+├─ logout.php               # Déconnexion
+│
+├─ assets/                  # Fichiers statiques
+│   ├─ css/
+│   ├─ js/
+│   └─ images/
+│
+├─ user/                    # Toutes les pages accessibles aux utilisateurs normaux
+│   ├─ dashboard.php
+│   ├─ profile.php
+│   ├─ panier.php
+│   └─ commandes.php
+│
+├─ admin/                   # Toutes les pages accessibles aux admins
+│   ├─ dashboard.php
+│   ├─ users.php             # Gestion des utilisateurs
+│   ├─ produits.php          # Gestion des produits
+│   └─ commandes.php         # Gestion des commandes
+│
+├─ includes/                # Fichiers partagés (header, footer, config, fonctions)
+│   ├─ header.php
+│   ├─ footer.php
+│   ├─ config.php
+│   └─ functions.php
+│
+└─ vendor/                  # Librairies externes (si tu utilises Composer ou autre)

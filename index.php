@@ -48,7 +48,7 @@ session_start(); // Toujours démarrer la session en haut de la page
                                     <a href="#" class="text-decoration-none text-light anchor d-lg-inline d-none">
                                         <span><i class="fa-regular fa-clock"></i></span>
                                         <span class="hide-sm">
-                                            Du lundi au samedi – de 08h30 à 18h00
+                                            Du lundi au vendredi – de 08h30 à 18h00
                                         </span>
                                     </a>
                                    
@@ -196,7 +196,7 @@ session_start(); // Toujours démarrer la session en haut de la page
         <div class="hero-text">
             <h1 data-aos="fade-up">Solutions de fabrication innovantes</h1>
             <p data-aos="fade-up" data-aos-delay="300">Alliant précision et efficacité dans chacun de nos produits.</p>
-            <a href="contact.html" class="btn btn-custom" data-aos="fade-up" data-aos-delay="400">Contactez-nous</a>
+            <a href="contact.php" class="btn btn-custom" data-aos="fade-up" data-aos-delay="400">Contactez-nous</a>
         </div>
     </section>
     <!-- End Hero  -------- -->
@@ -302,7 +302,7 @@ session_start(); // Toujours démarrer la session en haut de la page
                         <div class="card-body">
                             <h3 class="card-title mb-3">Fabrication sur mesure</h3>
                             <p class="card-text mb-4">Grâce à nos machines de découpe de haute précision, nous fabriquons des symboles et pièces en acier inoxydable adaptés à vos besoins spécifiques.</p>
-                            <a href="service.html" class="btn btn-custom">Voir plus</a>
+                            <a href="produits.php" class="btn btn-custom">Voir plus</a>
                         </div>
                     </div>
                 </div>
@@ -314,7 +314,7 @@ session_start(); // Toujours démarrer la session en haut de la page
                         <div class="card-body">
                             <h3 class="card-title mb-3">Articles en inox</h3>
                             <p class="card-text mb-4">Nous proposons une large gamme d’articles en inox de qualité, alliant robustesse, design et durabilité, destinés aussi bien aux professionnels qu’aux particuliers.</p>
-                            <a href="service.html" class="btn btn-custom">Voir plus</a>
+                            <a href="produits.php" class="btn btn-custom">Voir plus</a>
                         </div>
                     </div>
                 </div>
@@ -346,7 +346,7 @@ session_start(); // Toujours démarrer la session en haut de la page
                         </h2>
                         <p class="text-light mb-4">
                            Nous sommes là pour vous aider à répondre à toutes vos questions ou préoccupations.                        </p>
-                        <a href="contact.html" class="btn btn-custom shadow" data-aos="fade-up" data-aos-delay="200">
+                        <a href="contact.php" class="btn btn-custom shadow" data-aos="fade-up" data-aos-delay="200">
                             <span class="me-2">Contactez-nous</span>
                             <i class="fas fa-arrow-right"></i>
                         </a>

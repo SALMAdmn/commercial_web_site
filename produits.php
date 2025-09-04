@@ -1,3 +1,6 @@
+<?php
+session_start(); // Toujours démarrer la session en haut de la page
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -27,14 +30,14 @@
                             <div class="pt-2">
                                 <a href="#" class="text-decoration-none text-light anchor d-sm-inline d-none">
                                     <span><i class="fas fa-phone-volume"></i></span>
-                                    <span class="hide-sm">+0 123 456 7890</span>
+                                    <span class="hide-sm">+ 0523353914</span>
                                 </a>
                                 
                                 <span class="border-right d-md-inline d-none"></span>
                                 
                                 <a href="#" class="text-decoration-none text-light anchor d-md-inline d-none">
                                     <span><i class="fas fa-map-marker-alt"></i></span>
-                                    <span class="hide-sm">Your Street Address Here</span>
+                                    <span class="hide-sm">3 lot hasna jabrane, Av Khalil Jabran, El Jadida</span>
                                 </a>
                             </div>
                             
@@ -43,7 +46,7 @@
                                     <a href="#" class="text-decoration-none text-light anchor d-lg-inline d-none">
                                         <span><i class="fa-regular fa-clock"></i></span>
                                         <span class="hide-sm">
-                                            Mon to Sat - 09:00 to 21:00
+                                            Du lundi au vendredi – de 08h30 à 18h00
                                         </span>
                                     </a>
                                    
@@ -52,17 +55,17 @@
                                 
                                 <div class="social-icon d-flex">
                                     <div class="squre">
-                                        <a href="#" class="text-decoration-none">
+                                        <a href="https://www.facebook.com/profile.php?id=100076252924876" class="text-decoration-none">
                                             <i class="fab fa-facebook-f"></i>
                                         </a>
                                     </div>
                                     <div class="squre">
-                                        <a href="#" class="text-decoration-none">
+                                        <a href="https://www.facebook.com/profile.php?id=100076252924876" class="text-decoration-none">
                                             <i class="fa-brands fa-twitter"></i>
                                         </a>
                                     </div>
                                     <div class="squre">
-                                        <a href="#" class="text-decoration-none">
+                                        <a href="https://www.facebook.com/profile.php?id=100076252924876" class="text-decoration-none">
                                             <i class="fab fa-instagram"></i>
                                         </a>
                                     </div>
@@ -77,12 +80,13 @@
     </header>
     <!-- End Header  -------- -->
 
-    <!-- Start NavBAr  -------- -->
+     <!-- Start NavBAr  -------- -->
+
     <nav class="navbar navbar-expand-lg">
         <div class="container">
             
-            <a class="navbar-brand text-light"  href="index.html">
-                <h1  data-aos="fade-down">Elite</h1>
+            <a class="navbar-brand text-light"  href="index.php">
+                <h4  data-aos="fade-down">INOX INDUSTRIE</h4>
             </a>
             
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
@@ -95,37 +99,67 @@
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
                     <li class="nav-item">
-                        <a class="nav-link" aria-current="page" href="index.html">Home</a>
+                        <a class="nav-link" aria-current="page" href="index.php">Accueil</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="about-us.html">About Us</a>
+                        <a class="nav-link" href="apropos.php">À propos</a>
                     </li>
-                    <li class="nav-item">
+                    <!-- <li class="nav-item">
                         <a class="nav-link" href="capabilities.html">Our Capabilities</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="industries.html">Industries</a>
+                    </li> -->
+                    <li class="nav-item">
+                        <a class="nav-link  active" href="produits.php">Produits</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" href="case-studies.html">Case Studies</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="contact.html">Contact Us</a>
+                        <a class="nav-link" href="contact.php">Contact</a>
                     </li>
 
                 </ul>
-                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-                    <li class="nav-item">
-                        <a class="btn btn-custom" href="contact.html#quote">
-                            Get a Quote
-                        </a>
-                    </li>
-                </ul>
+                
+                      
+
+
+
+
+
+
+                    <ul class="navbar-nav ms-auto mb-2 mb-lg-0 d-flex gap-2">
+             
+                    
+                <?php if (isset($_SESSION['user_id'])): ?>
+                <a class="btn btn-outline-light" href="panier.php">
+                  <i class="fa-solid fa-cart-shopping"></i>
+                </a>
+            <?php else: ?>
+                 <a class="btn btn-outline-light" href="#" data-bs-toggle="modal" data-bs-target="#connectModal">
+                     <i class="fa-solid fa-cart-shopping"></i>
+                 </a>
+            <?php endif; ?>
+
+                
+            
+
+                <li class="nav-item">
+                    <?php if (isset($_SESSION['user_id'])): ?>
+                        <!-- Si connecté → bouton Déconnexion -->
+                        <a class="btn btn-custom" href="logout.php">Se Déconnecter</a>
+                    <?php else: ?>
+                        <!-- Si non connecté → bouton Connexion -->
+                        <a class="btn btn-custom" href="SignIn-SignUp-Form-main/login.php">Se Connecter</a>
+                    <?php endif; ?>
+                </li>
+            </ul>
+
+
+
+            
             </div>
         </div>
     </nav>
     <!-- End NavBAr  -------- -->
-
     <section class="case-studies-hero" style="background: linear-gradient(#000000a8, #000000a8), url('assets/IMG/bg1.jpg');">
         <div class="container">
             <div class="row">
@@ -133,15 +167,15 @@
                     
                     <!-- Hero Content -->
                     <div class="hero-content text-center">
-                        <h1 class="display-3 text-white mb-4" data-aos="fade-down">Our Success Stories</h1>
-                        <p class="lead text-light" data-aos="fade-up" data-aos-delay="100">Explore how we've transformed manufacturing processes for industry leaders worldwide</p>
+                        <h1 class="display-3 text-white mb-4" data-aos="fade-down">Nos Produits</h1>
+                        <p class="lead text-light" data-aos="fade-up" data-aos-delay="100">Découvrez notre large gamme d’articles en acier inoxydable, conçus pour allier qualité, durabilité et design. Que ce soit pour des projets industriels, artisanaux ou décoratifs, nous proposons des solutions adaptées à vos besoins avec une finition de précision.</p>
                     </div>
                     
                     <!-- Breadcrumb -->
                     <nav aria-label="breadcrumb" data-aos="fade-up" data-aos-delay="200">
                         <ol class="breadcrumb justify-content-center position-relative">
-                            <li class="breadcrumb-item"><a href="index.html" class="text-light">Home</a></li>
-                            <li class="breadcrumb-item active" aria-current="page">Case Studies</li>
+                            <li class="breadcrumb-item"><a href="index.html" class="text-light">Accueil</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">Produits</li>
                         </ol>
                     </nav>
 
@@ -156,7 +190,7 @@
             <div class="row">
                 <div class="col-12">
                     <ul class="filter-list">
-                        <li class="active" data-filter="all">All Industries</li>
+                        <li class="active" data-filter="all">Nos Produits en Inox</li>
                         <li data-filter="automotive">Automotive</li>
                         <li data-filter="aerospace">Aerospace</li>
                         <li data-filter="medical">Medical</li>
@@ -529,5 +563,28 @@
             });
         });
     </script>
+
+
+
+
+        <!-- Modal pour connexion obligatoire -->
+<div class="modal fade" id="connectModal" tabindex="-1" aria-labelledby="connectModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="connectModalLabel">Attention</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+      </div>
+      <div class="modal-body">
+        Vous devez être connecté pour accéder au panier !
+      </div>
+      <div class="modal-footer">
+        <a href="SignIn-SignUp-Form-main/login.php" class="btn btn-primary">Se connecter</a>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>

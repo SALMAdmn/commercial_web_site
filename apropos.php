@@ -30,14 +30,14 @@ session_start(); // Toujours démarrer la session en haut de la page
                             <div class="pt-2">
                                 <a href="#" class="text-decoration-none text-light anchor d-sm-inline d-none">
                                     <span><i class="fas fa-phone-volume"></i></span>
-                                    <span class="hide-sm">+0 123 456 7890</span>
+                                    <span class="hide-sm">+ 0523353914</span>
                                 </a>
                                 
                                 <span class="border-right d-md-inline d-none"></span>
                                 
                                 <a href="#" class="text-decoration-none text-light anchor d-md-inline d-none">
                                     <span><i class="fas fa-map-marker-alt"></i></span>
-                                    <span class="hide-sm">Your Street Address Here</span>
+                                    <span class="hide-sm">3 lot hasna jabrane, Av Khalil Jabran, El Jadida</span>
                                 </a>
                             </div>
                             
@@ -46,7 +46,7 @@ session_start(); // Toujours démarrer la session en haut de la page
                                     <a href="#" class="text-decoration-none text-light anchor d-lg-inline d-none">
                                         <span><i class="fa-regular fa-clock"></i></span>
                                         <span class="hide-sm">
-                                            Mon to Sat - 09:00 to 21:00
+                                            Du lundi au vendredi – de 08h30 à 18h00
                                         </span>
                                     </a>
                                    
@@ -55,17 +55,17 @@ session_start(); // Toujours démarrer la session en haut de la page
                                 
                                 <div class="social-icon d-flex">
                                     <div class="squre">
-                                        <a href="#" class="text-decoration-none">
+                                        <a href="https://www.facebook.com/profile.php?id=100076252924876" class="text-decoration-none">
                                             <i class="fab fa-facebook-f"></i>
                                         </a>
                                     </div>
                                     <div class="squre">
-                                        <a href="#" class="text-decoration-none">
+                                        <a href="https://www.facebook.com/profile.php?id=100076252924876" class="text-decoration-none">
                                             <i class="fa-brands fa-twitter"></i>
                                         </a>
                                     </div>
                                     <div class="squre">
-                                        <a href="#" class="text-decoration-none">
+                                        <a href="https://www.facebook.com/profile.php?id=100076252924876" class="text-decoration-none">
                                             <i class="fab fa-instagram"></i>
                                         </a>
                                     </div>
