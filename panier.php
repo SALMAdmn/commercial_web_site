@@ -1,66 +1,50 @@
 <?php
-// ✅ Démarrer la session seulement si elle n'est pas encore active
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
-
-// Connexion à la base de données
+session_start();
 $conn = new mysqli("localhost", "root", "", "inox_industrie");
+if ($conn->connect_error) die("Connexion échouée : " . $conn->connect_error);
 
-// Vérifier la connexion
-if ($conn->connect_error) {
-    die("Connexion échouée : " . $conn->connect_error);
-}
-
-// ✅ Mettre à jour la quantité d'un produit
-// ✅ Mettre à jour la quantité d'un produit avec contrôle du stock
-if (isset($_GET['update']) && isset($_GET['qty'])) {
-    $update_id = intval($_GET['update']);
-    $new_qty   = max(1, intval($_GET['qty'])); // minimum 1
-
-    // Vérifier si le produit existe dans la base
-    $sql = "SELECT stock FROM produits WHERE id = " . $update_id;
-    $result = $conn->query($sql);
-
-    if ($result && $row = $result->fetch_assoc()) {
-        $stock_disponible = intval($row['stock']);
-
-        // ✅ Limiter la quantité au stock max
-        if ($new_qty > $stock_disponible) {
-            $new_qty = $stock_disponible;
-        }
-
-        // ✅ Mettre à jour seulement si le produit est déjà dans le panier
-        if (isset($_SESSION['panier'][$update_id])) {
-            $_SESSION['panier'][$update_id] = $new_qty;
-        }
-    }
-
-    header("Location: panier.php");
+if (!isset($_SESSION['user_id'])) {
+    echo "<p class='alert alert-warning'>Veuillez vous connecter pour voir votre panier.</p>";
     exit();
 }
 
+$user_id = $_SESSION['user_id'];
 
-// ✅ Connexion à la base de données
-$conn = new mysqli("localhost", "root", "", "inox_industrie");
-if ($conn->connect_error) {
-    die("Connexion échouée : " . $conn->connect_error);
-}
-
-// ✅ Supprimer un produit du panier
+// Supprimer un produit du panier
 if (isset($_GET['remove'])) {
     $remove_id = intval($_GET['remove']);
-    if (isset($_SESSION['panier'][$remove_id])) {
-        unset($_SESSION['panier'][$remove_id]);
+    $conn->query("DELETE FROM paniers WHERE user_id=$user_id AND produit_id=$remove_id");
+    header("Location: panier.php");
+    exit();
+}
+
+// Mettre à jour la quantité
+if (isset($_GET['update']) && isset($_GET['qty'])) {
+    $update_id = intval($_GET['update']);
+    $new_qty = max(1, intval($_GET['qty']));
+
+    // Vérifier le stock
+    $res = $conn->query("SELECT stock FROM produits WHERE id=$update_id");
+    if ($res && $row = $res->fetch_assoc()) {
+        $stock = intval($row['stock']);
+        if ($new_qty > $stock) $new_qty = $stock;
+        $conn->query("UPDATE paniers SET quantite=$new_qty WHERE user_id=$user_id AND produit_id=$update_id");
     }
     header("Location: panier.php");
     exit();
 }
 
-// ✅ Vérifier si le panier est vide
-$empty_cart = !isset($_SESSION['panier']) || empty($_SESSION['panier']);
+// Récupérer le panier
+$result = $conn->query("
+    SELECT p.*, pa.quantite 
+    FROM paniers pa
+    JOIN produits p ON pa.produit_id = p.id
+    WHERE pa.user_id = $user_id
+");
+
+$empty_cart = ($result->num_rows === 0);
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -177,7 +161,7 @@ $empty_cart = !isset($_SESSION['panier']) || empty($_SESSION['panier']);
                         <a class="nav-link" href="industries.html">Industries</a>
                     </li> -->
                     <li class="nav-item">
-                        <a class="nav-link  active" href="produits.php">Produits</a>
+                        <a class="nav-link" href="produits.php">Produits</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="contact.php">Contact</a>
@@ -185,18 +169,11 @@ $empty_cart = !isset($_SESSION['panier']) || empty($_SESSION['panier']);
 
                 </ul>
                 
-                      
-
-
-
-
-
-
                     <ul class="navbar-nav ms-auto mb-2 mb-lg-0 d-flex gap-2">
              
                     
                 <?php if (isset($_SESSION['user_id'])): ?>
-                <a class="btn btn-outline-light" href="panier.php">
+                <a class="btn btn-outline-light   active" href="panier.php">
                   <i class="fa-solid fa-cart-shopping"></i>
                 </a>
             <?php else: ?>
@@ -243,7 +220,7 @@ $empty_cart = !isset($_SESSION['panier']) || empty($_SESSION['panier']);
     <!-- ici le contenu de panier -->
 <!-- ✅ CONTENU DU PANIER -->
 <section class="container mt-5 mb-0">
-    <h2 class="mb-4" style="margin-top: 70px;" >Mon Panier</h2>
+    <h2 class="mb-4" style="margin-top: 70px;">Mon Panier</h2>
 
     <?php if ($empty_cart): ?>
         <p class="alert alert-info">Votre panier est vide.</p>
@@ -259,56 +236,41 @@ $empty_cart = !isset($_SESSION['panier']) || empty($_SESSION['panier']);
                 </tr>
             </thead>
             <tbody>
-            <?php
-            $total = 0;
-            foreach ($_SESSION['panier'] as $id => $qty) {
-                $sql = "SELECT * FROM produits WHERE id = " . intval($id);
-                $result = $conn->query($sql);
-
-                if ($row = $result->fetch_assoc()) {
-                    $subtotal = $row['prix'] * $qty;
+                <?php
+                $total = 0;
+                while ($row = $result->fetch_assoc()) {
+                    $subtotal = $row['prix'] * $row['quantite'];
                     $total += $subtotal;
-
                     echo '<tr>
-                            <td>
-                                <img src="assets/IMG/' . htmlspecialchars($row['image']) . '" 
-                                     alt="' . htmlspecialchars($row['nom']) . '" 
-                                     style="width:80px; margin-right:10px;">
-                                ' . htmlspecialchars($row['nom']) . '
-                            </td>
-                            <td>' . $row['prix'] . ' DH</td>
-                            
-                            
-
-<td>
-    <form method="get" action="panier.php" class="d-flex align-items-center">
-        <input type="hidden" name="update" value="' . $id . '">
-        <button type="submit" name="qty" value="' . max(1, $qty - 1) . '" class="btn btn-sm btn-outline-secondary me-2">-</button>
-        <input type="text" name="qty" value="' . $qty . '" 
-               class="form-control text-center" style="width:60px;" readonly>
-        <button type="submit" name="qty" value="' . ($qty + 1) . '" class="btn btn-sm btn-outline-secondary ms-2">+</button>
-    </form>
-    <small class="text-muted">Stock max : ' . $row['stock'] . '</small>
-</td>
-
-
-                            
-
-                            <td>' . $subtotal . ' DH</td>
-                            <td>
-                                <a href="panier.php?remove=' . $id . '" 
-                                   class="btn btn-danger btn-sm">
-                                   <i class="fas fa-trash"></i> Supprimer
-                                </a>
-                            </td>
-                          </tr>';
+                        <td>
+                            <img src="assets/IMG/'.$row['image'].'" 
+                                 alt="'.$row['nom'].'" 
+                                 style="width:80px; margin-right:10px;">
+                            '.$row['nom'].'
+                        </td>
+                        <td>'.$row['prix'].' DH</td>
+                        <td>
+                            <form method="get" action="panier.php" class="d-flex align-items-center">
+                                <input type="hidden" name="update" value="'.$row['id'].'">
+                                <button type="submit" name="qty" value="'.max(1,$row['quantite']-1).'" class="btn btn-sm btn-outline-secondary me-2">-</button>
+                                <input type="text" name="qty" value="'.$row['quantite'].'" class="form-control text-center" style="width:60px;" readonly>
+                                <button type="submit" name="qty" value="'.($row['quantite']+1).'" class="btn btn-sm btn-outline-secondary ms-2">+</button>
+                            </form>
+                            <small class="text-muted">Stock max : '.$row['stock'].'</small>
+                        </td>
+                        <td>'.$subtotal.' DH</td>
+                        <td>
+                            <a href="panier.php?remove='.$row['id'].'" class="btn btn-danger btn-sm">
+                                <i class="fas fa-trash"></i> Supprimer
+                            </a>
+                        </td>
+                    </tr>';
                 }
-            }
-            ?>
-            <tr>
-                <td colspan="3"><strong>Total général</strong></td>
-                <td colspan="2"><strong><?php echo $total; ?> DH</strong></td>
-            </tr>
+                ?>
+                <tr>
+                    <td colspan="3"><strong>Total général</strong></td>
+                    <td colspan="2"><strong><?php echo $total; ?> DH</strong></td>
+                </tr>
             </tbody>
         </table>
 

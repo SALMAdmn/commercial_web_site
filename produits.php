@@ -1,43 +1,46 @@
 <?php
-session_start(); // Toujours démarrer la session en haut de la page
-?>
-<?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
-// Connexion à la base de données
 $conn = new mysqli("localhost", "root", "", "inox_industrie");
-if($conn->connect_error){
+if ($conn->connect_error) {
     die("Connexion échouée : " . $conn->connect_error);
 }
 
-// ----------------------
-// 1️⃣ Ajouter un produit au panier
-// ----------------------
-if(isset($_GET['add_cart'])){
-    $product_id = $_GET['add_cart'];
+// Vérifier que l'utilisateur est connecté
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit();
+}
+$user_id = $_SESSION['user_id'];
 
-    // Créer le panier si il n'existe pas
-    if(!isset($_SESSION['panier'])){
-        $_SESSION['panier'] = array();
+// Ajouter au panier
+if (isset($_POST['add_cart'])) {
+    $produit_id = intval($_POST['produit_id']);
+    $quantite   = max(1, intval($_POST['quantite']));
+
+    // Vérifier stock
+    $result = $conn->query("SELECT stock FROM produits WHERE id=$produit_id");
+    if ($row = $result->fetch_assoc()) {
+        $stock = intval($row['stock']);
+        if ($quantite > $stock) {
+            $quantite = $stock;
+        }
+
+        // Vérifier si produit existe déjà dans le panier
+        $check = $conn->query("SELECT * FROM paniers WHERE user_id=$user_id AND produit_id=$produit_id");
+        if ($check->num_rows > 0) {
+            $conn->query("UPDATE paniers SET quantite=$quantite WHERE user_id=$user_id AND produit_id=$produit_id");
+        } else {
+            $conn->query("INSERT INTO paniers(user_id, produit_id, quantite) VALUES($user_id, $produit_id, $quantite)");
+        }
     }
-
-    // Ajouter le produit ou augmenter la quantité
-    if(isset($_SESSION['panier'][$product_id])){
-        $_SESSION['panier'][$product_id] += 1;
-    } else {
-        $_SESSION['panier'][$product_id] = 1;
-    }
-
-    // Redirection pour éviter le doublon à la recharge
     header("Location: produits.php");
     exit();
 }
-
-// ----------------------
-// 2️⃣ Récupérer tous les produits pour l'affichage
-// ----------------------
-$sql = "SELECT * FROM produits";
-$result = $conn->query($sql);
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -272,48 +275,50 @@ $result = $conn->query($sql);
                     </div>
                 </div> -->
                 <?php
-$conn = new mysqli("localhost", "root", "", "inox_industrie");
-if($conn->connect_error){ die("Connexion échouée : " . $conn->connect_error); }
 
 $sql = "SELECT * FROM produits";
 $result = $conn->query($sql);
-?>
 
-<h2>Nos Produits</h2>
-<div class="row">
-<?php
 if($result->num_rows > 0){
     while($row = $result->fetch_assoc()){
-        echo '
-        <div class="col-lg-4 col-md-6 mb-4" data-aos="fade-up" data-category="'.$row['categorie'].'">
+        ?>
+        <div class="col-lg-4 col-md-6 mb-4" data-aos="fade-up" data-category="<?= $row['categorie'] ?>">
             <div class="case-study-card">
                 <div class="case-study-img">
-                    <img src="assets/IMG/'.$row['image'].'" alt="'.$row['nom'].'" class="img-fluid">
-                    <div class="case-study-badge">'.$row['categorie'].'</div>
+                    <img src="assets/IMG/<?= $row['image'] ?>" alt="<?= $row['nom'] ?>" class="img-fluid">
+                    <div class="case-study-badge"><?= $row['categorie'] ?></div>
                 </div>
                 <div class="case-study-content">
-                    <h3>'.$row['nom'].'</h3>
-                    <p class="case-study-excerpt">'.$row['description'].'</p>
+                    <h3><?= $row['nom'] ?></h3>
+                    <p class="case-study-excerpt"><?= $row['description'] ?></p>
                     <div class="case-study-results">
                         <div class="result-item">
                             <i class="fas fa-dollar-sign"></i>
-                            <span>Prix : '.$row['prix'].'</span>
+                            <span>Prix : <?= $row['prix'] ?> DH</span>
                         </div>
                         <div class="result-item">
                             <i class="fas fa-box"></i>
-                            <span>Stock : '.$row['stock'].'</span>
+                            <span>Stock : <?= $row['stock'] ?></span>
                         </div>
                     </div>
-                    <a href="produits.php?add_cart='.$row['id'].'" class="btn btn-custom">Ajouter au panier</a>
+
+                    <form class="add-to-cart-form" method="POST" action="produits.php" data-id="<?= $row['id'] ?>">
+                        <input type="hidden" name="produit_id" value="<?= $row['id'] ?>">
+                        <input type="number" name="quantite" value="1" min="1" max="<?= $row['stock'] ?>" class="form-control mb-2">
+                        <button type="submit" class="btn btn-custom">Ajouter au panier</button>
+                    </form>
                 </div>
             </div>
-        </div>';
+        </div>
+        <?php
     }
 } else {
     echo "<p>Aucun produit disponible pour le moment.</p>";
 }
 ?>
-</div>
+
+
+
      
 
             </div>
@@ -467,6 +472,52 @@ if($result->num_rows > 0){
     </div>
   </div>
 </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+$(document).ready(function() {
+    $('.add-to-cart-form').submit(function(e){
+        e.preventDefault(); // empêche le rechargement de la page
+
+        var produitId = $(this).data('id');
+        var quantite = $(this).find('input[name="quantite"]').val();
+
+        $.ajax({
+            url: 'add_to_cart.php',
+            method: 'POST',
+            data: { produit_id: produitId, quantite: quantite },
+            success: function(response){
+                // alert('Produit ajouté au panier !');  <-- Supprimé ou commenté
+                // tu peux mettre à la place un compteur dans le panier si tu veux
+            },
+            error: function(){
+                 alert('Erreur lors de l\'ajout au panier.'); 
+            }
+        });
+    });
+});
+</script>
+
+
 
 </body>
 </html>
