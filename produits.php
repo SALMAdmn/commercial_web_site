@@ -231,13 +231,15 @@ if (isset($_POST['add_cart'])) {
             <div class="row">
                 <div class="col-12">
                     <ul class="filter-list">
-                        <li class="active" data-filter="all">Nos Produits en Inox</li>
-                        <li data-filter="automotive">Automotive</li>
-                        <li data-filter="aerospace">Aerospace</li>
-                        <li data-filter="medical">Medical</li>
-                        <li data-filter="energy">Energy</li>
-                        <li data-filter="defense">Defense</li>
-                    </ul>
+    <li class="active" data-filter="all">Tous les Produits</li>
+    <li data-filter="Alimentaire">Alimentaire</li>
+    <li data-filter="Construction">Construction</li>
+    <li data-filter="Transport">Transport</li>
+    <li data-filter="EnergieChimie">Énergie & Chimie</li>
+    <li data-filter="Domestique">Domestique</li>
+    <li data-filter="Medical">Médical</li>
+</ul>
+
                 </div>
             </div>
         </div>
@@ -274,16 +276,44 @@ if (isset($_POST['add_cart'])) {
                         </div>
                     </div>
                 </div> -->
-                <?php
+              
+              
+              
+              
+              
+              
+              
+<?php
+// ----- Pagination -----
+$produitsParPage = 6; // nombre de produits par page
+$page = isset($_GET['page']) ? intval($_GET['page']) : 1;
+if ($page < 1) $page = 1;
+$offset = ($page - 1) * $produitsParPage;
 
-$sql = "SELECT * FROM produits";
+// Récupérer produits avec LIMIT
+$sql = "SELECT * FROM produits LIMIT $offset, $produitsParPage";
 $result = $conn->query($sql);
 
+// Compter le total pour calculer le nombre de pages
+$totalResult = $conn->query("SELECT COUNT(*) as total FROM produits");
+$totalRow = $totalResult->fetch_assoc();
+$totalProduits = $totalRow['total'];
+$totalPages = ceil($totalProduits / $produitsParPage);
+
+// ----- Affichage -----
 if($result->num_rows > 0){
     while($row = $result->fetch_assoc()){
         ?>
-        <div class="col-lg-4 col-md-6 mb-4" data-aos="fade-up" data-category="<?= $row['categorie'] ?>">
-            <div class="case-study-card">
+<?php
+$categorySlug = $row['categorie'];
+if ($categorySlug === 'Énergie & Chimie') {
+    $categorySlug = 'EnergieChimie';
+}
+?>
+
+<div class="col-lg-4 col-md-6 mb-4" data-aos="fade-up" data-category="<?= $categorySlug ?>">
+
+<div class="case-study-card">
                 <div class="case-study-img">
                     <img src="assets/IMG/<?= $row['image'] ?>" alt="<?= $row['nom'] ?>" class="img-fluid">
                     <div class="case-study-badge"><?= $row['categorie'] ?></div>
@@ -302,7 +332,7 @@ if($result->num_rows > 0){
                         </div>
                     </div>
 
-                    <form class="add-to-cart-form" method="POST" action="produits.php" data-id="<?= $row['id'] ?>">
+                    <form class="add-to-cart-form" method="POST" action="produits.php?page=<?= $page ?>" data-id="<?= $row['id'] ?>">
                         <input type="hidden" name="produit_id" value="<?= $row['id'] ?>">
                         <input type="number" name="quantite" value="1" min="1" max="<?= $row['stock'] ?>" class="form-control mb-2">
                         <button type="submit" class="btn btn-custom">Ajouter au panier</button>
@@ -316,6 +346,28 @@ if($result->num_rows > 0){
     echo "<p>Aucun produit disponible pour le moment.</p>";
 }
 ?>
+
+<!-- ----- Pagination links ----- -->
+<div class="pagination mt-4 d-flex justify-content-center">
+    <nav>
+        <ul class="pagination">
+            <?php if ($page > 1): ?>
+                <li class="page-item"><a class="page-link" href="produits.php?page=<?= $page - 1 ?>">Précédent</a></li>
+            <?php endif; ?>
+
+            <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                <li class="page-item <?= ($i == $page) ? 'active' : '' ?>">
+                    <a class="page-link" href="produits.php?page=<?= $i ?>"><?= $i ?></a>
+                </li>
+            <?php endfor; ?>
+
+            <?php if ($page < $totalPages): ?>
+                <li class="page-item"><a class="page-link" href="produits.php?page=<?= $page + 1 ?>">Suivant</a></li>
+            <?php endif; ?>
+        </ul>
+    </nav>
+</div>
+
 
 
 
