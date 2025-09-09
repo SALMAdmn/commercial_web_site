@@ -25,10 +25,22 @@ if(isset($_POST['submit'])){
     $image = preg_replace("/[^a-zA-Z0-9.-]/", "_", $image);
     $target = "../../assets/IMG/".$image;
 
+    $discount_percent = !empty($_POST['discount_percent']) ? $con->real_escape_string($_POST['discount_percent']) : NULL;
+$date_debut_discount = !empty($_POST['date_debut_discount']) ? $con->real_escape_string($_POST['date_debut_discount']) : NULL;
+$date_fin_discount = !empty($_POST['date_fin_discount']) ? $con->real_escape_string($_POST['date_fin_discount']) : NULL;
+
+// Calcul automatique du prix promo si % est défini
+$prix_promo = NULL;
+if($discount_percent !== NULL){
+    $prix_promo = $prix - ($prix * $discount_percent / 100);
+}
+
     if(move_uploaded_file($_FILES['image']['tmp_name'], $target)){
-        $sql = "INSERT INTO produits (nom, description, image, prix, stock, categorie)
-                VALUES ('$nom','$description','$image','$prix','$stock','$categorie')";
-        if($con->query($sql) === TRUE){
+        $sql = "INSERT INTO produits 
+(nom, description, image, prix, stock, categorie, prix_promo, discount_percent, date_debut_discount, date_fin_discount)
+VALUES
+('$nom','$description','$image','$prix','$stock','$categorie','$prix_promo','$discount_percent','$date_debut_discount','$date_fin_discount')";
+if($con->query($sql) === TRUE){
             $message = "✅ Produit ajouté avec succès !";
         } else {
             $message = "❌ Erreur SQL : " . $con->error;
@@ -113,6 +125,20 @@ if(isset($_POST['submit'])){
     <div class="mb-3">
   <label class="form-label">Prix</label>
   <input type="number" step="0.01" min="0" name="prix" class="form-control" required>
+</div>
+    <div class="mb-3">
+  <label class="form-label">Pourcentage de réduction (%)</label>
+  <input type="number" min="0" max="100" name="discount_percent" class="form-control">
+</div>
+
+<div class="mb-3">
+  <label class="form-label">Date début promotion</label>
+  <input type="date" name="date_debut_discount" class="form-control">
+</div>
+
+<div class="mb-3">
+  <label class="form-label">Date fin promotion</label>
+  <input type="date" name="date_fin_discount" class="form-control">
 </div>
 
 

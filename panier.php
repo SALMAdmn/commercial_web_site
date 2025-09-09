@@ -237,40 +237,60 @@ $empty_cart = ($result->num_rows === 0);
             </thead>
             <tbody>
                 <?php
-                $total = 0;
-                while ($row = $result->fetch_assoc()) {
-                    $subtotal = $row['prix'] * $row['quantite'];
-                    $total += $subtotal;
-                    echo '<tr>
-                        <td>
-                            <img src="assets/IMG/'.$row['image'].'" 
-                                 alt="'.$row['nom'].'" 
-                                 style="width:80px; margin-right:10px;">
-                            '.$row['nom'].'
-                        </td>
-                        <td>'.$row['prix'].' DH</td>
-                        <td>
-                            <form method="get" action="panier.php" class="d-flex align-items-center">
-                                <input type="hidden" name="update" value="'.$row['id'].'">
-                                <button type="submit" name="qty" value="'.max(1,$row['quantite']-1).'" class="btn btn-sm btn-outline-secondary me-2">-</button>
-                                <input type="text" name="qty" value="'.$row['quantite'].'" class="form-control text-center" style="width:60px;" readonly>
-                                <button type="submit" name="qty" value="'.($row['quantite']+1).'" class="btn btn-sm btn-outline-secondary ms-2">+</button>
-                            </form>
-                            <small class="text-muted">Stock max : '.$row['stock'].'</small>
-                        </td>
-                        <td>'.$subtotal.' DH</td>
-                        <td>
-                            <a href="panier.php?remove='.$row['id'].'" class="btn btn-danger btn-sm">
-                                <i class="fas fa-trash"></i> Supprimer
-                            </a>
-                        </td>
-                    </tr>';
-                }
-                ?>
-                <tr>
-                    <td colspan="3"><strong>Total général</strong></td>
-                    <td colspan="2"><strong><?php echo $total; ?> DH</strong></td>
-                </tr>
+$total = 0;
+while ($row = $result->fetch_assoc()) {
+    $quantite = intval($row['quantite']);
+    
+    // Gestion du discount actif
+    $prix_utilise = $row['prix'];
+    $discount = 0;
+    if(!empty($row['prix_promo']) && !empty($row['date_debut_discount']) && !empty($row['date_fin_discount'])) {
+        $now = date('Y-m-d H:i:s');
+        if($now >= $row['date_debut_discount'] && $now <= $row['date_fin_discount']) {
+            $prix_utilise = $row['prix_promo'];
+            $discount = $row['discount_percent'];
+        }
+    }
+
+    $subtotal = $prix_utilise * $quantite;
+    $total += $subtotal;
+
+    echo '<tr>
+        <td>
+            <img src="assets/IMG/'.$row['image'].'" alt="'.$row['nom'].'" style="width:80px; margin-right:10px;">
+            '.$row['nom'].'
+        </td>
+        <td>';
+            if($discount > 0){
+                echo '<del>'.$row['prix'].' DH</del> '.$prix_utilise.' DH <small class="text-success">(-'.$discount.'%)</small>';
+            } else {
+                echo $prix_utilise.' DH';
+            }
+    echo '</td>
+        <td>
+            <form method="get" action="panier.php" class="d-flex align-items-center">
+                <input type="hidden" name="update" value="'.$row['id'].'">
+                <button type="submit" name="qty" value="'.max(1,$quantite-1).'" class="btn btn-sm btn-outline-secondary me-2">-</button>
+                <input type="text" name="qty_current" value="'.$quantite.'" class="form-control text-center" style="width:60px;" readonly>
+                <button type="submit" name="qty" value="'.($quantite+1).'" class="btn btn-sm btn-outline-secondary ms-2">+</button>
+            </form>
+            <small class="text-muted">Stock max : '.$row['stock'].'</small>
+        </td>
+        <td>'.$subtotal.' DH</td>
+        <td>
+            <a href="panier.php?remove='.$row['id'].'" class="btn btn-danger btn-sm">
+                <i class="fas fa-trash"></i> Supprimer
+            </a>
+        </td>
+    </tr>';
+}
+?>
+<tr>
+    <td colspan="3"><strong>Total général</strong></td>
+    <td colspan="2"><strong><?php echo $total; ?> DH</strong></td>
+</tr>
+
+
             </tbody>
         </table>
 

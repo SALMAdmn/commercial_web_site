@@ -290,11 +290,11 @@ $page = isset($_GET['page']) ? intval($_GET['page']) : 1;
 if ($page < 1) $page = 1;
 $offset = ($page - 1) * $produitsParPage;
 
-// Récupérer produits avec LIMIT
+// ----- Récupérer produits avec LIMIT -----
 $sql = "SELECT * FROM produits LIMIT $offset, $produitsParPage";
 $result = $conn->query($sql);
 
-// Compter le total pour calculer le nombre de pages
+// ----- Compter le total pour pagination -----
 $totalResult = $conn->query("SELECT COUNT(*) as total FROM produits");
 $totalRow = $totalResult->fetch_assoc();
 $totalProduits = $totalRow['total'];
@@ -303,20 +303,27 @@ $totalPages = ceil($totalProduits / $produitsParPage);
 // ----- Affichage -----
 if($result->num_rows > 0){
     while($row = $result->fetch_assoc()){
+        // Slug catégorie pour filtrage JS si besoin
+        $categorySlug = $row['categorie'];
+        if ($categorySlug === 'Énergie & Chimie') $categorySlug = 'EnergieChimie';
+
+        // Gestion du discount
+        $prix_affiche = $row['prix'];
+        $badge_discount = "";
+        if(!empty($row['prix_promo']) && !empty($row['date_debut_discount']) && !empty($row['date_fin_discount'])){
+            $now = date('Y-m-d H:i:s');
+            if($now >= $row['date_debut_discount'] && $now <= $row['date_fin_discount']){
+                $prix_affiche = $row['prix_promo'];
+                $badge_discount = "<span class='badge bg-success'>-{$row['discount_percent']}%</span>";
+            }
+        }
         ?>
-<?php
-$categorySlug = $row['categorie'];
-if ($categorySlug === 'Énergie & Chimie') {
-    $categorySlug = 'EnergieChimie';
-}
-?>
 
-<div class="col-lg-4 col-md-6 mb-4" data-aos="fade-up" data-category="<?= $categorySlug ?>">
-
-<div class="case-study-card">
+        <div class="col-lg-4 col-md-6 mb-4" data-aos="fade-up" data-category="<?= $categorySlug ?>">
+            <div class="case-study-card">
                 <div class="case-study-img">
                     <img src="assets/IMG/<?= $row['image'] ?>" alt="<?= $row['nom'] ?>" class="img-fluid">
-                    <div class="case-study-badge"><?= $row['categorie'] ?></div>
+                    <div class="case-study-badge"><?= $row['categorie'] ?> <?= $badge_discount ?></div>
                 </div>
                 <div class="case-study-content">
                     <h3><?= $row['nom'] ?></h3>
@@ -324,7 +331,13 @@ if ($categorySlug === 'Énergie & Chimie') {
                     <div class="case-study-results">
                         <div class="result-item">
                             <i class="fas fa-dollar-sign"></i>
-                            <span>Prix : <?= $row['prix'] ?> DH</span>
+                            <span>
+                                <?php if($prix_affiche != $row['prix']): ?>
+                                    <del><?= $row['prix'] ?> DH</del> <?= $prix_affiche ?> DH
+                                <?php else: ?>
+                                    <?= $prix_affiche ?> DH
+                                <?php endif; ?>
+                            </span>
                         </div>
                         <div class="result-item">
                             <i class="fas fa-box"></i>
@@ -335,7 +348,7 @@ if ($categorySlug === 'Énergie & Chimie') {
                     <form class="add-to-cart-form" method="POST" action="produits.php?page=<?= $page ?>" data-id="<?= $row['id'] ?>">
                         <input type="hidden" name="produit_id" value="<?= $row['id'] ?>">
                         <input type="number" name="quantite" value="1" min="1" max="<?= $row['stock'] ?>" class="form-control mb-2">
-                        <button type="submit" class="btn btn-custom">Ajouter au panier</button>
+                        <button type="submit" name="add_cart" class="btn btn-custom">Ajouter au panier</button>
                     </form>
                 </div>
             </div>
@@ -345,7 +358,11 @@ if ($categorySlug === 'Énergie & Chimie') {
 } else {
     echo "<p>Aucun produit disponible pour le moment.</p>";
 }
+
+
+
 ?>
+
 
 <!-- ----- Pagination links ----- -->
 <div class="pagination mt-4 d-flex justify-content-center">
