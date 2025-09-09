@@ -1,16 +1,13 @@
 <?php
-session_start(); // Démarre la session
+session_start();
 
-// Déconnexion de l'utilisateur
-$_SESSION = array(); // Vide toutes les variables de session
-session_destroy(); // Détruit la session
+// Supprimer toutes les variables de session
+$_SESSION = array();
 
-// Empêcher le retour en arrière
-header("Cache-Control: no-cache, no-store, must-revalidate");
-header("Pragma: no-cache");
-header("Expires: 0");
+// Détruire la session
+session_destroy();
 
-// Rediriger vers la page de connexion
+// Redirection vers la page de connexion
 header("Location: admin.php");
 exit;
 ?>

@@ -1,7 +1,7 @@
 <?php
 session_start();
 if(!isset($_SESSION['email'])){
-    header('location: ../admin.php'); // redirection si pas connecté
+    header('location: ../admin.php');
     exit;
 }
 
@@ -10,31 +10,50 @@ $sql = "SELECT * FROM admin WHERE email='".$_SESSION['email']."'";
 $r = mysqli_query($con,$sql) or die('Erreur exec');
 $d = mysqli_fetch_array($r);
 
-// Message après ajout
+if(!isset($_GET['id'])){
+    die("ID produit manquant !");
+}
+
+$id = (int)$_GET['id'];
+
+// Récupérer les données du produit
+$sql_produit = "SELECT * FROM produits WHERE id = $id";
+$res = $con->query($sql_produit);
+if($res->num_rows == 0){
+    die("Produit introuvable !");
+}
+$produit = $res->fetch_assoc();
+
 $message = "";
 
 // Traitement du formulaire
 if(isset($_POST['submit'])){
-    $nom = $con->real_escape_string($_POST['nom']);
     $description = $con->real_escape_string($_POST['description']);
     $prix = $con->real_escape_string($_POST['prix']);
     $stock = $con->real_escape_string($_POST['stock']);
     $categorie = $con->real_escape_string($_POST['categorie']);
 
-    $image = basename($_FILES['image']['name']);
-    $image = preg_replace("/[^a-zA-Z0-9.-]/", "_", $image);
-    $target = "../../assets/IMG/".$image;
+    $image = $produit['image']; // image existante
+    if(isset($_FILES['image']) && $_FILES['image']['name'] != ""){
+        $image_tmp = $_FILES['image']['tmp_name'];
+        $image = preg_replace("/[^a-zA-Z0-9.-]/", "_", basename($_FILES['image']['name']));
+        move_uploaded_file($image_tmp, "../../assets/IMG/".$image);
+    }
 
-    if(move_uploaded_file($_FILES['image']['tmp_name'], $target)){
-        $sql = "INSERT INTO produits (nom, description, image, prix, stock, categorie)
-                VALUES ('$nom','$description','$image','$prix','$stock','$categorie')";
-        if($con->query($sql) === TRUE){
-            $message = "✅ Produit ajouté avec succès !";
-        } else {
-            $message = "❌ Erreur SQL : " . $con->error;
-        }
+    $update_sql = "UPDATE produits 
+                   SET description='$description', prix='$prix', stock='$stock', categorie='$categorie', image='$image'
+                   WHERE id=$id";
+
+    if($con->query($update_sql)){
+        $message = "✅ Produit mis à jour avec succès !";
+        // Recharger les données
+        $produit['description'] = $description;
+        $produit['prix'] = $prix;
+        $produit['stock'] = $stock;
+        $produit['categorie'] = $categorie;
+        $produit['image'] = $image;
     } else {
-        $message = "⚠️ Erreur lors de l'upload de l'image.";
+        $message = "❌ Erreur : " . $con->error;
     }
 }
 ?>
@@ -44,19 +63,16 @@ if(isset($_POST['submit'])){
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Ajouter un produit - Admin</title>
+  <title>Modifier un produit - Admin</title>
 
   <!-- Bootstrap -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-
   <!-- FontAwesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
   <style>
     body { min-height: 100vh; display: flex; }
-    .sidebar {
-      width: 250px; background: #194ed6ff; color: #fff; flex-shrink: 0;
-    }
+    .sidebar { width: 250px; background: #194ed6ff; color: #fff; flex-shrink: 0; }
     .sidebar a { color: #fff; text-decoration: none; }
     .sidebar a:hover { background: #1040a6ff; color: #fff; }
     .content { flex-grow: 1; padding: 20px; background: #f8f9fa; }
@@ -72,8 +88,8 @@ if(isset($_POST['submit'])){
     <li>
       <a class="nav-link text-white" data-bs-toggle="collapse" href="#produitMenu"><i class="fas fa-box"></i> Produits</a>
       <div class="collapse ps-3 show" id="produitMenu">
-        <a href="admin_add_product.php" class="nav-link active bg-primary">Ajouter Produit</a>
-        <a href="afficher_produit.php" class="nav-link text-white">Afficher Produit</a>
+        <a href="admin_add_product.php" class="nav-link text-white">Ajouter Produit</a>
+        <a href="afficher_produit.php" class="nav-link active bg-primary">Modifier Produit</a>
         <a href="stock_moins3.php" class="nav-link text-white">Stock &lt; 3</a>
       </div>
     </li>
@@ -95,55 +111,53 @@ if(isset($_POST['submit'])){
 
 <!-- Content -->
 <div class="content">
-  <h2>Ajouter un produit</h2>
+  <h2>Modifier un produit</h2>
 
   <?php if(!empty($message)) echo "<div class='alert alert-info'>$message</div>"; ?>
 
   <form method="POST" enctype="multipart/form-data" class="mt-3">
     <div class="mb-3">
       <label class="form-label">Nom du produit</label>
-      <input type="text" name="nom" class="form-control" required>
+      <input type="text" class="form-control" value="<?php echo $produit['nom']; ?>" readonly>
     </div>
 
     <div class="mb-3">
       <label class="form-label">Description</label>
-      <textarea name="description" rows="4" class="form-control" required></textarea>
+      <textarea name="description" rows="4" class="form-control" required><?php echo $produit['description']; ?></textarea>
     </div>
 
     <div class="mb-3">
-  <label class="form-label">Prix</label>
-  <input type="number" step="0.01" min="0" name="prix" class="form-control" required>
-</div>
-
+      <label class="form-label">Prix</label>
+      <input type="number" step="0.01" min="0" name="prix" class="form-control" value="<?php echo $produit['prix']; ?>" required>
+    </div>
 
     <div class="mb-3">
       <label class="form-label">Stock</label>
-      <input type="number" name="stock" class="form-control" required>
+      <input type="number" name="stock" class="form-control" value="<?php echo $produit['stock']; ?>" required>
     </div>
 
     <div class="mb-3">
       <label class="form-label">Catégorie</label>
       <select name="categorie" class="form-select" required>
-        <option value="">--Sélectionnez--</option>
-        <option value="Alimentaire">Alimentaire</option>
-        <option value="Construction">Construction</option>
-        <option value="Transport">Transport</option>
-        <option value="Énergie & Chimie">Énergie & Chimie</option>
-        <option value="Domestique">Domestique</option>
-        <option value="Médical">Médical</option>
+        <option value="Alimentaire" <?php if($produit['categorie']=="Alimentaire") echo "selected"; ?>>Alimentaire</option>
+        <option value="Construction" <?php if($produit['categorie']=="Construction") echo "selected"; ?>>Construction</option>
+        <option value="Transport" <?php if($produit['categorie']=="Transport") echo "selected"; ?>>Transport</option>
+        <option value="Énergie & Chimie" <?php if($produit['categorie']=="Énergie & Chimie") echo "selected"; ?>>Énergie & Chimie</option>
+        <option value="Domestique" <?php if($produit['categorie']=="Domestique") echo "selected"; ?>>Domestique</option>
+        <option value="Médical" <?php if($produit['categorie']=="Médical") echo "selected"; ?>>Médical</option>
       </select>
     </div>
 
     <div class="mb-3">
-      <label class="form-label">Image</label>
-      <input type="file" name="image" class="form-control" accept="image/*" required>
+      <label class="form-label">Image</label><br>
+      <img src="../../assets/IMG/<?php echo $produit['image']; ?>" width="100" class="mb-2"><br>
+      <input type="file" name="image" class="form-control" accept="image/*">
     </div>
 
-    <button type="submit" name="submit" class="btn btn-primary">Ajouter produit</button>
+    <button type="submit" name="submit" class="btn btn-primary">Modifier Produit</button>
   </form>
 </div>
 
-<!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
