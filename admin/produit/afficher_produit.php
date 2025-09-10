@@ -70,8 +70,8 @@ body { min-height: 100vh; display: flex; }
 <li>
   <a class="nav-link text-white" data-bs-toggle="collapse" href="#demandeMenu"><i class="fas fa-list"></i> Demandes</a>
   <div class="collapse ps-3" id="demandeMenu">
-    <a href="../demande/envoye.php" class="nav-link text-white">Demandes envoyées</a>
-    <a href="../demande/gerer.php" class="nav-link text-white">Gérer</a>
+    <a href="envoye.php" class="nav-link text-white">Demandes envoyées</a>
+    <a href="gerer.php" class="nav-link text-white">Gérer</a>
   </div>
 </li>
 <li><a href="../profil/monprofil.php" class="nav-link text-white"><i class="fas fa-user"></i> Profil</a></li>

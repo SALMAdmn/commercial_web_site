@@ -296,7 +296,7 @@ while ($row = $result->fetch_assoc()) {
 
         <div class="text-end">
             <a href="demande.php" class="btn btn-primary btn-lg">
-                Valider la demande / Obtenir un devis
+                Valider la demande 
             </a>
         </div>
     <?php endif; ?>
