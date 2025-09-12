@@ -70,7 +70,7 @@ $d = mysqli_fetch_array($r);
     <li>
       <a class="nav-link text-white" data-bs-toggle="collapse" href="#demandeMenu"><i class="fas fa-list"></i> Demandes</a>
       <div class="collapse ps-3" id="demandeMenu">
-        <a href="demande/envoye.php" class="nav-link text-white">Demandes envoyées</a>
+        <a href="produit/envoye.php" class="nav-link text-white">Demandes envoyées</a>
         <a href="demande/gerer.php" class="nav-link text-white">Gérer</a>
       </div>
     </li>

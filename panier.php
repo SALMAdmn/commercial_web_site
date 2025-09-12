@@ -9,6 +9,12 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 $user_id = $_SESSION['user_id'];
+// Récupérer l'email du user
+$email = '';
+$res_user = $conn->query("SELECT email FROM users WHERE id = $user_id");
+if ($res_user && $row_user = $res_user->fetch_assoc()) {
+    $email = $row_user['email'];
+}
 
 // Supprimer un produit du panier
 if (isset($_GET['remove'])) {
@@ -225,6 +231,8 @@ $empty_cart = ($result->num_rows === 0);
     <?php if ($empty_cart): ?>
         <p class="alert alert-info">Votre panier est vide.</p>
     <?php else: ?>
+        <div id="panierTable">
+
         <table class="table table-bordered align-middle">
             <thead class="table-dark">
                 <tr>
@@ -293,12 +301,50 @@ while ($row = $result->fetch_assoc()) {
 
             </tbody>
         </table>
+   </div>
 
-        <div class="text-end">
-            <a href="demande.php" class="btn btn-primary btn-lg">
-                Valider la demande 
-            </a>
-        </div>
+
+<p class="alert alert-info" id="panierVide" style="display:none;">Votre panier est vide.</p>
+
+
+
+<form id="panierForm" method="post" action="admin/produit/envoye.php" class="text-end">
+    <?php
+    // On récupère les infos du panier pour les envoyer
+    $i = 0;
+    $result->data_seek(0); // Remet le curseur au début du résultat
+    while($row = $result->fetch_assoc()) {
+        $quantite = intval($row['quantite']);
+
+        // Prix avec discount
+        $prix_utilise = $row['prix'];
+        if(!empty($row['prix_promo']) && !empty($row['date_debut_discount']) && !empty($row['date_fin_discount'])) {
+            $now = date('Y-m-d H:i:s');
+            if($now >= $row['date_debut_discount'] && $now <= $row['date_fin_discount']){
+                $prix_utilise = $row['prix_promo'];
+            }
+        }
+
+        $subtotal = $prix_utilise * $quantite;
+    ?>
+        <input type="hidden" name="email" value="<?= $email ?>">
+
+        <input type="hidden" name="produits[<?= $i ?>][nom]" value="<?= $row['nom'] ?>">
+        <input type="hidden" name="produits[<?= $i ?>][quantite]" value="<?= $quantite ?>">
+        <input type="hidden" name="produits[<?= $i ?>][prix]" value="<?= $subtotal ?>">
+    <?php
+        $i++;
+    }
+    ?>
+    <input type="hidden" name="total_general" value="<?= $total ?>">
+<!-- Bouton qui déclenche le modal -->
+<!-- Bouton qui déclenche le submit et le modal -->
+<button type="button" class="btn btn-primary btn-lg" id="validateBtn">
+    Valider la demande
+</button>
+
+</form>
+
     <?php endif; ?>
 </section>
 
@@ -351,6 +397,54 @@ while ($row = $result->fetch_assoc()) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+document.getElementById('validateBtn').addEventListener('click', function() {
+    var form = document.getElementById('panierForm');
+    var formData = new FormData(form);
+
+    fetch(form.action, {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.text())
+    .then(data => {
+        // Affiche le modal
+        var confirmationModal = new bootstrap.Modal(document.getElementById('confirmationModal'));
+        confirmationModal.show();
+
+        // Cacher le tableau
+        document.getElementById('panierTable').style.display = 'none';
+        // Afficher le message "panier vide"
+        document.getElementById('panierVide').style.display = 'block';
+        // Remettre le total à 0
+        document.querySelector('strong').innerText = '0 DH';
+        // Cacher le bouton
+        document.getElementById('validateBtn').style.display = 'none';
+    })
+    .catch(error => {
+        console.error('Erreur:', error);
+    });
+});
+
+
+</script>
+
+
+
+
         <!-- Modal pour connexion obligatoire -->
 <div class="modal fade" id="connectModal" tabindex="-1" aria-labelledby="connectModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
@@ -369,6 +463,49 @@ while ($row = $result->fetch_assoc()) {
     </div>
   </div>
 </div>
+<!-- Modal pour confirmation de la demande -->
+<div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="confirmationModalLabel">Demande Validée</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+      </div>
+      <div class="modal-body">
+        Votre demande a été validée !<br>
+        Vous allez recevoir le code bancaire pour procéder au paiement.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+    </div>
+  </div>
+</div>
+
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$('#sendFormBtn').click(function(e){
+    e.preventDefault(); // Empêche le rechargement normal du formulaire
+    var form = $('#panierForm');
+
+    $.post(form.attr('action'), form.serialize(), function(data){
+        // Affiche la fenêtre de confirmation
+        $('#confirmationModal').modal('show');
+
+        // Remplace le tableau du panier par le message "vide"
+        document.querySelector('#panierContent').innerHTML = '<p class="alert alert-info">Votre panier est vide.</p>';
+
+        // Remettre le total à 0 DH
+        document.querySelector('#totalGeneral').innerText = '0 DH';
+    });
+});
+</script>
 
 </body>
 </html>

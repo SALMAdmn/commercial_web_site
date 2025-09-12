@@ -1,504 +1,204 @@
 <?php
 session_start();
-
 if(!isset($_SESSION['email'])){
-
-    header('location: ../admin.php');
+    header('location: admin.php');
     exit;
 }
-if($_SESSION['action']!='technicien' and $_SESSION['action']!='stagiére'){
 
-    header('location: ../admin.php');
+$con = mysqli_connect('localhost','root','','inox_industrie') or die('Impossible d\'accéder au serveur');
+$sql = "SELECT * FROM admin WHERE email='".$_SESSION['email']."'";
+$r = mysqli_query($con,$sql) or die('Erreur exec');
+$d = mysqli_fetch_array($r);
+
+// =====================
+// Connexion DB pour demandes
+// =====================
+$conn = new mysqli("localhost", "root", "", "inox_industrie");
+if ($conn->connect_error) die("Erreur : " . $conn->connect_error);
+
+// Enregistrer nouvelle demande (depuis panier)
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['produits'])) {
+    $email = $_POST['email'];
+    $total = $_POST['total_general'];
+    $produits = json_encode($_POST['produits'], JSON_UNESCAPED_UNICODE);
+
+$sql = "INSERT INTO demandes (email, produits, total, statut, date_demande) 
+        VALUES (?, ?, ?, 'en_attente', NOW())";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("ssd", $email, $produits, $total);
+
+    $stmt->execute();
+}
+
+// Validation d’une demande
+if (isset($_GET['valider'])) {
+    $id = intval($_GET['valider']);
+    $sql = "UPDATE demandes SET statut='valide', date_validation=NOW() WHERE id=?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i", $id);
+    $stmt->execute();
+    header("Location: envoye.php");
     exit;
 }
+
+// Récupération des demandes
+$result = $conn->query("SELECT * FROM demandes ORDER BY date_demande DESC");
+
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['produits'])) {
+    $email = $_POST['email'];
+    $total = $_POST['total_general'];
+    $produits = json_encode($_POST['produits'], JSON_UNESCAPED_UNICODE);
+
+    $sql = "INSERT INTO demandes (email, produits, total, statut, date_demande) 
+            VALUES (?, ?, ?, 'en_attente', NOW())";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("ssd", $email, $produits, $total);
+    $stmt->execute();
+
+    // ✅ Supprimer les produits du panier après l'envoi de la demande
+    $stmt_del = $conn->prepare("DELETE FROM paniers WHERE user_id = ?");
+    $stmt_del->bind_param("i", $_SESSION['user_id']); // ou email si tu utilises email
+    $stmt_del->execute();
+
+    echo json_encode(['success' => true]); // pour AJAX
+    exit;
+}
+
 
 ?>
+
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-with, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin - Demandes envoyées</title>
 
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <title> site autohall</title>
-    
-    <link rel="preconnect" href="https://fonts.gstatic.com">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <!-- FontAwesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-
-<style>
-* {
-  margin: 0;
-  padding: 0;
-  font-family: 'Poppins', sans-serif;
-}
-a{
-      color: grey;
-    } 
-.creer{
-    display: inline-block;
-    text-decoration: none;
-    color: #fff;
-    border: 1px solid #fff;
-    border-radius: 5px;
-    padding: 12px 34px;
-    margin: 15px 15px;
-    font-size: 26px; 
-    background: #001B60;
-    /*position: relative;*/
-    cursor: pointer;
-    margin-left:90px;
-}
-.creer:hover{
-    border: 1px solid #001B60;
-    background: #001B60;
-    transition: 1s; 
-
-}
-/* Styles pour la fenêtre modale */
-        .modal {
-            display: none; /* Cachée par défaut */
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.5); /* Fond semi-transparent */
-        }
-        .modal-content {
-            background-color: #fff;
-            margin: 20% auto;
-            padding: 20px;
-            border: 1px solid #888;
-            width: 80%;
-            max-width: 400px;
-            text-align: center;
-        }
-        .modal-buttons {
-            margin-top: 20px;
-        }
-        /* Style pour les boutons personnalisés */
-        .modal-buttons button {
-            padding: 10px 20px;
-            margin: 0 10px;
-            border: none;
-            cursor: pointer;
-            border-radius: 5px;
-            font-size: 16px;
-        }
-        .modal-buttons button.red {
-            background-color: #ff6666; /* Rouge */
-            color: #fff;
-        }
-        .modal-buttons button.green {
-            background-color: #66cc66; /* Vert */
-            color: #fff;
-        }
-/*sidebar*/
-.side-bar{
- background: #00011A;
- backdrop-filter: blur(15px);
- width: 17%;
- height: 100vh;
- position: fixed;
- top: 0;
- left: 0px;
- overflow-y: auto;
- transition: 0.6s ease;
- transition-property: left;
-}
-.menu-btn{
- position: absolute;
- color: black;
- font-size: 35px;
- margin: 25px;
- cursor: pointer;
-}
-
-.entete{
- background: #fff;
-  height: 80px;
-}
-.entete img{
-width: 130px;
- padding-left: 40px;
- padding-top: 10px;
-}
-
-
-
-.close-btn{
- position: absolute;
- color: #00011A;
- font-size: 23px;
- right:  0px;
- margin: 15px;
- cursor: pointer;
-}
-.side-bar .menu{
- width: 100%;
- margin-top: 30px;
-}
-.side-bar .menu .item{
- position: relative;
- cursor: pointer;
-}
-.side-bar .menu .item a{
- color: #fff;
- font-size: 16px;
- text-decoration: none;
- display: block;
- padding: 5px 30px;
- line-height: 60px;
-}
-
-
-.side-bar .menu .item a:hover{
-background: #000430;
- transition: 0.3s ease;
-}
-.side-bar .menu .item i{
- margin-right: 15px;
-}
-
-
-.side-bar .menu .item a .dropdown{
- position: absolute;
- right: 0;
- margin: 20px;
- transition: 0.3s ease;
-}
-.side-bar .menu .item .sub-menu{
-  background: #00011A;
- display: none;
-}
-.side-bar .menu .item .sub-menu a{
-    line-height: 30px;
-    font-size: 12px;
-    padding-left: 80px;
-
-}
-.rotate{
- transform: rotate(90deg);
-}
-.side-bar.active{
-    left: -300px;
-}
-
-
-.on{
-background-color: #001B60;
-}
-/*liste*/
-    .table{
-    min-height: 100vh;
-    width: 100%;
-    background-color: #fff;
-}
-
-table, th, td{
-    /*border: 1px solid;*/
-    border-collapse: collapse;
-}
-.tableau{ 
-    transition: 0.6s ease;
-    display: inline-block;
-    margin-left: 10%;
-    padding: 40px 130px; 
-    width: 30%;
-
-}
-
-.tableau th,td{
-    padding: 15px;
-    text-align: left;
-}
-
-
-tr:nth-child(even) {
-    background-color: #f2f2f2;
-}
-
-.ouvrir{
-  display: inline-block;
-  color: grey;
-  padding: 6px 17px;
-  
-}
-</style>
-
+  <style>
+    body {
+      min-height: 100vh;
+      display: flex;
+    }
+    .sidebar {
+      width: 250px;
+      background: #194ed6ff;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .sidebar a {
+      color: #fff;
+      text-decoration: none;
+    }
+    .sidebar a:hover {
+      background: #1040a6ff;
+      color: #fff;
+    }
+    .content {
+      flex-grow: 1;
+      padding: 20px;
+      background: #f8f9fa;
+    }
+  </style>
 </head>
 <body>
-    
-              <div class="menu-btn">
-   <i class="fas fa-bars"></i>
-</div>
-<div class="side-bar">
-    <header class="entete">
-  <div class="close-btn">
-     <i class="fas fa-times"></i>
+
+<!-- Sidebar -->
+<div class="sidebar d-flex flex-column p-3">
+  <h3 class="text-center mb-4">Inox_Industrie</h3>
+  <ul class="nav nav-pills flex-column mb-auto">
+    <li><a href="acceuil.php" class="nav-link text-white"><i class="fas fa-home"></i> Accueil</a></li>
+    <li>
+      <a class="nav-link text-white" data-bs-toggle="collapse" href="#produitMenu"><i class="fas fa-box"></i> Produits</a>
+      <div class="collapse ps-3" id="produitMenu">
+        <a href="produit/admin_add_product.php" class="nav-link text-white">Ajouter Produit</a>
+        <a href="produit/afficher_produit.php" class="nav-link text-white">Afficher Produit</a>
+        <a href="produit/stock_moins3.php" class="nav-link text-white">Stock</a>
+      </div>
+    </li>
+    <li>
+      <a class="nav-link text-white" data-bs-toggle="collapse" href="#demandeMenu"><i class="fas fa-list"></i> Demandes</a>
+      <div class="collapse show ps-3" id="demandeMenu">
+        <a href="produit/envoye.php" class="nav-link active text-white">Demandes envoyées</a>
+        <a href="demande/gerer.php" class="nav-link text-white">Gérer</a>
+      </div>
+    </li>
+    <li><a href="profil/monprofil.php" class="nav-link text-white"><i class="fas fa-user"></i> Profil</a></li>
+    <li><a href="deconnexion.php" class="nav-link text-danger"><i class="fas fa-sign-out-alt"></i> Déconnexion</a></li>
+  </ul>
+  <hr>
+  <div class="text-center">
+    <small>Bonjour <strong><?php echo $d['username']; ?></strong> 👋</small>
   </div>
-  <img src="../images/logo.jpeg" alt="">
-  
-</header>
-
-
-<div class="menu">
-<div class="item"><a href="../acceuil.php"><i class="fas fa-home"></i>Acceuil</a></div>
- 
-   <div  class="on"><div class="item"><a href="ticketàfaire.php"><i class="fas fa-hands-helping"></i>Mes tickets</a></div></div>
-  
- <div class="item">
-    <a class="sub-btn"><i class="fas fa-user"></i>Profil<i class="fas fa-angle-right dropdown"></i></a>
-    <div class="sub-menu">
-       <a href="../profil/monprofil.php" class="sub-item">Mon Profil</a>
-    </div>
-  </div>
-  <div class="item"><a href="../deconnexion.php"><i class="fas fa-sign-out-alt"></i>Déconnecter</a></div>
 </div>
-</div>
-<?php 
 
-$con=mysqli_connect('localhost','root','','autohall') or die('Impossible d\'accerder auserveur');
+<!-- Content -->
+<div class="content">
+  <h1 class="mb-4">📋 Demandes envoyées</h1>
 
-
-
-$sql="select * from ticket where attribue='".$_SESSION['email']."'";
-
-$r=mysqli_query($con,$sql) or die('erreur exec recet');
-    if(mysqli_num_rows($r)==0){
-        echo "<h2 style='color:red; text-align:center; padding-top: 20%; font-size: 64px;'>AUCUN TICKET</h2>";
-    }
-        else
-        { $sql1="select count(*) as count1 from ticket where attribue='".$_SESSION['email']."'";
-          $r1=mysqli_query($con,$sql1);
-          $d1 = mysqli_fetch_assoc($r1);
-          $count1=$d1['count1'];
-
-          $sql2="select count(*) as count2 from ticket where attribue='".$_SESSION['email']."' and statut='encours'";
-          $r2=mysqli_query($con,$sql2);
-          $d2 = mysqli_fetch_assoc($r2);
-          $count2=$d2['count2'];
-
-          $sql3="select count(*) as count3 from ticket where attribue='".$_SESSION['email']."' and statut='terminé'";
-          $r3=mysqli_query($con,$sql3);
-          $d3 = mysqli_fetch_assoc($r3);
-          $count3=$d3['count3'];
-
-
-
-?>
-<section class="table">
-<div class="tableau">
-    <h1 style="font-size: 32px;">Mes Tickets </h1>
-    <br>
-    <h3> Total <?php echo $count1; ?> Tickets : <?php echo $count2; ?> Encours et <?php echo $count3;?> Terminé</h3>
-    <br>
-<table border="1" width="100%">
-    <thead> 
-        <tr>
-                   <th>Id</th> 
-                   <th>Titre</th>
-                   <th>Description</th> 
-                   <th>Demandeur</th>
-                   <th>Attribué à</th>
-                   <th>Statut</th>
-                   <th>Urgence</th>
-                   <th>Lieu</th> 
-                   <th>Type</th>
-                   <th>Catégorie</th>
-                   <th>Derniére modification</th>
-                   <th>Date d'ouverture</th>
-                   <th>Temps de résolution</th>
-                   <th>Image</th>
-                
-        </tr>
+  <table class="table table-bordered table-striped">
+    <thead class="table-primary">
+      <tr>
+        <th>ID</th>
+        <th>Email</th>
+        <th>Produits</th>
+        <th>Total</th>
+        <th>Statut</th>
+        <th>Date demande</th>
+        <th>Date validation</th>
+        <th>Actions</th>
+      </tr>
     </thead>
-    <tbody>        
-
-<?php 
-while($d = mysqli_fetch_array($r)){
-    echo "<tr>";
-    echo "<td>";
-    echo $d['id'];
-    echo "</td>";
-    echo "<td>";
-    echo $d['titre'];
-    echo "</td >";
-  echo "<td>";
-  echo $d['description'];
-  echo "</td >";
-  echo "<td>";
-  echo $d['demandeur'];
-  echo "</td >";
-  echo "<td>";
-    echo $d['attribue'];
-    echo "</td >";
-    echo "<td>";
-    if ($d['statut']=='encours') {
-    echo "<form action='' method='post'>
-    <select name='statut".$d['id']."'>
-                <option value='encours'>encours</option>
-                <option value='terminé'>terminé</option>
-              </select>
-          <button type='submit'>Submit</button>
-          </form>
-              ";}
-    elseif ($d['statut']=='terminé') {
-    echo "<form action='' method='post'>
-    <select name='statut".$d['id']."'>
-                <option value='terminé'>terminé</option>
-                <option value='encours'>encours</option>
-              </select>
-          <button type='submit'>Submit</button>
-          </form>
-              ";} 
-    echo "</td >";
-    echo "<td>";
-    echo $d['urgence'];
-    echo "</td >";
-    echo "<td>";
-    echo $d['lieu'];
-    echo "</td >";
-    echo "<td>";
-    echo $d['type'];
-    echo "</td >";
-    echo "<td>";
-    echo $d['categorie'];
-    echo "</td >";
-    echo "<td>";
-    echo $d['modification'];
-    echo "</td >";
-    echo "<td>";
-    echo $d['date_ouverture'];
-    echo "</td >";
-    echo "<td>";
-    echo $d['temps_resolution'];
-    echo "</td >";
-     echo "<td>";
-    if (file_exists("image/".$d['id'].".png")) {
-echo '<a href="image/'.$d['id'].'.png" class="ouvrir">ouvrir image</a>';
-   }
- else {
-    echo "aucune image";
-  }
-    echo "</td>";
-    echo "</tr>";
-
-    if (isset($_POST['statut'.$d['id']])) {
-   $sql1="UPDATE ticket
-  SET statut ='".$_POST['statut'.$d['id']]."'
-  where id ='".$d['id']."'";
-  mysqli_query($con,$sql1);         }
-
-
-
-}
-
-
-
-
-
-
-
-
-
-
-
-
-    ?>
-
+    <tbody>
+      <?php while($row = $result->fetch_assoc()): ?>
+        <tr>
+          <td><?= $row['id'] ?></td>
+          <td><?= htmlspecialchars($row['email']) ?></td>
+          <td>
+            <?php
+              $produits = json_decode($row['produits'], true);
+              foreach($produits as $p){
+                echo $p['nom']." x".$p['quantite']." (".$p['prix']." DH)<br>";
+              }
+            ?>
+          </td>
+          <td><?= $row['total'] ?> DH</td>
+          <td>
+            <?php if ($row['statut'] == 'en_attente'): ?>
+              <span class="badge bg-warning">En attente</span>
+            <?php else: ?>
+              <span class="badge bg-success">Validée</span>
+            <?php endif; ?>
+          </td>
+          <td><?= $row['date_demande'] ?></td>
+          <td><?= $row['date_validation'] ?: '-' ?></td>
+          <td>
+            <a class="btn btn-sm btn-info" target="_blank"
+               href="https://mail.google.com/mail/?view=cm&fs=1&to=<?= urlencode($row['email']) ?>">
+               📧 Contacter
+            </a>
+            <?php if ($row['statut'] == 'en_attente'): ?>
+              <a class="btn btn-sm btn-success"
+                 href="envoye.php?valider=<?= $row['id'] ?>"
+                 onclick="return confirm('Valider cette demande ?')">
+                 ✅ Valider
+              </a>
+            <?php endif; ?>
+          </td>
+        </tr>
+      <?php endwhile; ?>
     </tbody>
-</table>
-
-</section>
-
-<?php } ?>
-    
-
-
-<!-- Fenêtre modale de confirmation -->
-<div id="myModal" class="modal">
-  <div class="modal-content">
-    <p>Êtes-vous sûr de vouloir supprimer cet élément?</p>
-    <div class="modal-buttons">
-        <button class="red" onclick="confirmDelete()">Supprimer</button>
-        <button class="green" onclick="hideModal()">Annuler</button>
-    </div>
-  </div>
+  </table>
 </div>
 
-<script>
-// Fonction pour afficher la fenêtre modale
-function showModal(confirmationUrl) {
-    // Empêcher le comportement par défaut du lien (c'est-à-dire la navigation)
-    event.preventDefault();
-    // Afficher la fenêtre modale
-    document.getElementById('myModal').style.display = 'block';
-    // Stocker l'URL de confirmation dans un attribut de données du bouton de confirmation
-    document.getElementById('confirmButton').dataset.confirmationUrl = confirmationUrl;
-}
-
-// Fonction pour cacher la fenêtre modale
-function hideModal() {
-    document.getElementById('myModal').style.display = 'none';
-}
-
-// Fonction pour confirmer la suppression et rediriger vers l'URL de confirmation
-function confirmDelete() {
-    // Récupérer l'URL de confirmation à partir de l'attribut de données du bouton de confirmation
-    var confirmationUrl = document.getElementById('confirmButton').dataset.confirmationUrl;
-    // Rediriger vers l'URL de confirmation
-    window.location.href = confirmationUrl;
-}
-</script>
-
-<!-- Champ caché pour stocker l'URL de confirmation -->
-<input type="hidden" id="confirmButton">
-
-<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.datatables.net/2.0.0/js/dataTables.js"></script>
-<script src="https://cdn.datatables.net/2.0.0/js/dataTables.bootstrap5.js"></script>
-
-
-
-<script>
-  new DataTable('#example');
-</script>
-
-
-
-
-
-    
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-<script>
-    
-     $(document).ready(function(){
-     //jquery for toggle sub menus
-     $('.sub-btn').click(function(){
-       $(this).next('.sub-menu').slideToggle();
-       $(this).find('.dropdown').toggleClass('rotate');
-     });
-     //jquery for expand and collapse the sidebar
-     $('.menu-btn').click(function(){
-       $('.side-bar').removeClass('active');
-       $('.tableau').css("margin-left", "10%");
-       $('.menu-btn').css("visibility", "hidden");
-     });
-     //Active cancel button
-     $('.close-btn').click(function(){
-       $('.side-bar').addClass('active');
-         $('.tableau').css("margin-left", "0%");
-       $('.menu-btn').css("visibility", "visible");
-     });
-   });
-</script>
-
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
-
