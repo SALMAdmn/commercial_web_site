@@ -22,7 +22,11 @@ $filter_status = isset($_GET['status']) ? $_GET['status'] : '';
 // Construire la requête
 $sql = "SELECT * FROM demandes WHERE 1 ";
 if($search != ''){
-    $sql .= " AND (id LIKE '%$search%' OR email LIKE '%$search%') ";
+    if(is_numeric($search)){
+        $sql .= " AND id = " . intval($search);
+    } else {
+        $sql .= " AND email LIKE '%$search%'";
+    }
 }
 if($filter_status == 'valide'){
     $sql .= " AND statut='valide' ";
@@ -94,19 +98,22 @@ body { min-height: 100vh; display: flex; }
 <table class="table table-bordered table-hover align-middle">
 <thead class="table-dark">
 <tr>
+<th>ID</th>
 <th>Email</th>
 <th>Produits</th>
 <th>Total</th>
 <th>Statut</th>
 <th>Date demande</th>
 <th>Date validation</th>
+<th>Preuve</th>
 <th>Actions</th>
 </tr>
 </thead>
 <tbody>
 <?php while($row = $result->fetch_assoc()): ?>
 <tr>
-<td><?php echo htmlspecialchars($row['email']); ?></td>
+<td><?= $row['id']; ?></td>
+<td><?= htmlspecialchars($row['email']); ?></td>
 <td>
 <?php
 $produits = json_decode($row['produits'], true);
@@ -115,7 +122,7 @@ foreach($produits as $p){
 }
 ?>
 </td>
-<td><?php echo $row['total']; ?> DH</td>
+<td><?= $row['total']; ?> DH</td>
 <td>
 <?php if($row['statut']=='en_attente'): ?>
 <span class="badge bg-warning">En attente</span>
@@ -123,17 +130,26 @@ foreach($produits as $p){
 <span class="badge bg-success">Validée</span>
 <?php endif; ?>
 </td>
-<td><?php echo $row['date_demande']; ?></td>
-<td><?php echo $row['date_validation'] ?: '-'; ?></td>
+<td><?= $row['date_demande']; ?></td>
+<td><?= $row['date_validation'] ?: '-'; ?></td>
+<td>
+<?php if(!empty($row['preuve'])): ?>
+<a class="btn btn-sm btn-primary" href="uploads/<?= $row['preuve']; ?>" download>
+📥 Télécharger reçu
+</a>
+<?php else: ?>
+-
+<?php endif; ?>
+</td>
 <td>
 <a class="btn btn-sm btn-info" target="_blank"
-   href="https://mail.google.com/mail/?view=cm&fs=1&to=<?php echo urlencode($row['email']); ?>">
+   href="https://mail.google.com/mail/?view=cm&fs=1&to=<?= urlencode($row['email']); ?>">
    📧 Contacter
 </a>
+
 <?php if($row['statut']=='en_attente'): ?>
 <a class="btn btn-sm btn-success"
-   href="envoye.php?valider=<?php echo $row['id']; ?>"
-   onclick="return confirm('Valider cette demande ?')">
+   href="validation.php?id=<?= $row['id']; ?>">
    ✅ Valider
 </a>
 <?php endif; ?>
