@@ -23,11 +23,17 @@ if(isset($_POST['add'])){
     $email = $conn->real_escape_string($_POST['email']);
     $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
 
-    $sql_add = "INSERT INTO admin (username,email,password) VALUES ('$username','$email','$password')";
-    if($conn->query($sql_add)){
-        $success = "Admin ajouté avec succès !";
+    // Vérifier doublon email seulement
+    $check = $conn->query("SELECT * FROM admin WHERE email='$email'");
+    if($check->num_rows > 0){
+        $error = "⚠️ Cet email existe déjà !";
     } else {
-        $error = "Erreur : " . $conn->error;
+        $sql_add = "INSERT INTO admin (username,email,password) VALUES ('$username','$email','$password')";
+        if($conn->query($sql_add)){
+            $success = "✅ Admin ajouté avec succès !";
+        } else {
+            $error = "❌ Erreur : " . $conn->error;
+        }
     }
 }
 
@@ -36,9 +42,9 @@ if(isset($_GET['delete'])){
     $id = intval($_GET['delete']);
     if($id != $admin['id']){
         $conn->query("DELETE FROM admin WHERE id=$id");
-        $success = "Admin supprimé !";
+        $success = "✅ Admin supprimé !";
     } else {
-        $error = "Vous ne pouvez pas vous supprimer vous-même !";
+        $error = "⚠️ Vous ne pouvez pas vous supprimer vous-même !";
     }
 }
 
@@ -47,15 +53,22 @@ if(isset($_POST['edit'])){
     $id = intval($_POST['id']);
     $username = $conn->real_escape_string($_POST['username']);
     $email = $conn->real_escape_string($_POST['email']);
-    $update_sql = "UPDATE admin SET username='$username', email='$email'";
-    if(!empty($_POST['password'])){
-        $update_sql .= ", password='".password_hash($_POST['password'], PASSWORD_DEFAULT)."'";
-    }
-    $update_sql .= " WHERE id=$id";
-    if($conn->query($update_sql)){
-        $success = "Admin modifié avec succès !";
+
+    // Vérifier doublon email seulement pour modification (sauf pour l'admin lui-même)
+    $check = $conn->query("SELECT * FROM admin WHERE email='$email' AND id!=$id");
+    if($check->num_rows > 0){
+        $error = "⚠️ Cet email est déjà utilisé par un autre admin !";
     } else {
-        $error = "Erreur : " . $conn->error;
+        $update_sql = "UPDATE admin SET username='$username', email='$email'";
+        if(!empty($_POST['password'])){
+            $update_sql .= ", password='".password_hash($_POST['password'], PASSWORD_DEFAULT)."'";
+        }
+        $update_sql .= " WHERE id=$id";
+        if($conn->query($update_sql)){
+            $success = "✅ Admin modifié avec succès !";
+        } else {
+            $error = "❌ Erreur : " . $conn->error;
+        }
     }
 }
 
@@ -75,42 +88,34 @@ body { min-height: 100vh; display: flex; }
 .sidebar { width: 250px; background: #194ed6ff; color: #fff; flex-shrink: 0; }
 .sidebar a { color: #fff; text-decoration: none; }
 .sidebar a:hover { background: #1040a6ff; color: #fff; }
-.sidebar .submenu { padding-left: 15px; }
 .content { flex-grow: 1; padding: 20px; background: #f8f9fa; }
+.sidebar .submenu { padding-left: 15px; }
 </style>
 </head>
 <body>
 
 <!-- Sidebar -->
 <div class="sidebar d-flex flex-column p-3">
-<h3 class="text-center mb-4">Inox_Industrie</h3>
-<ul class="nav nav-pills flex-column mb-auto">
-<li><a href="../acceuil.php" class="nav-link text-white"><i class="fas fa-home"></i> Accueil</a></li>
-
-<li>
-  <a class="nav-link text-white" data-bs-toggle="collapse" href="#produitMenu"><i class="fas fa-box"></i> Produits</a>
-  <div class="collapse ps-3 show" id="produitMenu">
-    <a href="admin_add_product.php" class="nav-link text-white">Ajouter Produit</a>
-    <a href="afficher_produit.php" class="nav-link text-white">Afficher Produit</a>
+  <h3 class="text-center mb-4">Inox_Industrie</h3>
+  <ul class="nav nav-pills flex-column mb-auto">
+    <li><a href="acceuil.php" class="nav-link text-white"><i class="fas fa-home"></i> Accueil</a></li>
+    <li>
+      <a class="nav-link text-white" data-bs-toggle="collapse" href="#produitMenu">
+        <i class="fas fa-box"></i> Produits
+      </a>
+      <div class="collapse ps-3" id="produitMenu">
+        <a href="produit/admin_add_product.php" class="nav-link text-white">Ajouter Produit</a>
+        <a href="produit/afficher_produit.php" class="nav-link text-white">Afficher Produit</a>
+      </div>
+    </li>
+    <li><a href="produit/envoye.php" class="nav-link text-white"><i class="fas fa-list"></i> Demandes</a></li>
+    <li><a href="monprofil.php" class="nav-link text-white"><i class="fas fa-user"></i> Profil</a></li>
+    <li><a href="deconnexion.php" class="nav-link text-danger"><i class="fas fa-sign-out-alt"></i> Déconnexion</a></li>
+  </ul>
+  <hr>
+  <div class="text-center">
+    <small>Bonjour <strong><?= htmlspecialchars($admin['username']); ?></strong> 👋</small>
   </div>
-</li>
-
-<li><a href="envoye.php" class="nav-link text-white"><i class="fas fa-list"></i> Demandes</a></li>
-
-<li>
-  <a class="nav-link text-white" data-bs-toggle="collapse" href="#profilMenu"><i class="fas fa-user"></i> Profil</a>
-  <div class="collapse ps-3" id="profilMenu">
-    <a href="monprofil.php" class="nav-link text-white">Mon profil</a>
-    <a href="admin_management.php" class="nav-link active bg-primary">Gérer Admins</a>
-  </div>
-</li>
-
-<li><a href="../deconnexion.php" class="nav-link text-danger"><i class="fas fa-sign-out-alt"></i> Déconnexion</a></li>
-</ul>
-<hr>
-<div class="text-center">
-<small>Bonjour <strong><?= htmlspecialchars($admin['username']); ?></strong> 👋</small>
-</div>
 </div>
 
 <!-- Contenu -->
@@ -152,9 +157,7 @@ body { min-height: 100vh; display: flex; }
 <td><?= htmlspecialchars($row['username']) ?></td>
 <td><?= htmlspecialchars($row['email']) ?></td>
 <td>
-<!-- Modifier -->
 <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editModal<?= $row['id'] ?>"><i class="fas fa-edit"></i></button>
-<!-- Supprimer -->
 <?php if($row['id'] != $admin['id']): ?>
 <a href="?delete=<?= $row['id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Supprimer cet admin ?')"><i class="fas fa-trash"></i></a>
 <?php endif; ?>

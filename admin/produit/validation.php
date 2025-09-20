@@ -11,7 +11,7 @@ if($conn->connect_error) die("Connexion échouée : " . $conn->connect_error);
 // Récupération info admin
 $sql = "SELECT * FROM admin WHERE email='".$_SESSION['email']."'";
 $r = $conn->query($sql);
-$d = $r->fetch_assoc();
+$admin = $r->fetch_assoc(); // <- Utiliser $admin pour être cohérent avec le nav
 
 // Vérifier si l'id est fourni
 if(!isset($_GET['id'])){
@@ -27,7 +27,6 @@ if(!$demande){
 
 // Traitement du formulaire
 if(isset($_POST['valider_envoi'])){
-    // Upload de l'image
     if(isset($_FILES['preuve']) && $_FILES['preuve']['error'] == 0){
         $ext = pathinfo($_FILES['preuve']['name'], PATHINFO_EXTENSION);
         $filename = 'preuve_'.$id.'_'.time().'.'.$ext;
@@ -36,7 +35,6 @@ if(isset($_POST['valider_envoi'])){
         if(!is_dir($upload_dir)) mkdir($upload_dir, 0777, true);
 
         if(move_uploaded_file($_FILES['preuve']['tmp_name'], $upload_dir.$filename)){
-            // Enregistrer le nom du fichier dans la BDD
             $conn->query("UPDATE demandes SET preuve='$filename', statut='valide', date_validation=NOW() WHERE id=$id");
             $demande['preuve'] = $filename;
             $demande['statut'] = 'valide';
@@ -68,25 +66,31 @@ body { min-height: 100vh; display: flex; }
 </head>
 <body>
 
+
+<!-- Sidebar -->
 <div class="sidebar d-flex flex-column p-3">
-<h3 class="text-center mb-4">Inox_Industrie</h3>
-<ul class="nav nav-pills flex-column mb-auto">
-<li><a href="../acceuil.php" class="nav-link text-white"><i class="fas fa-home"></i> Accueil</a></li>
-<li>
-  <a class="nav-link text-white" data-bs-toggle="collapse" href="#demandeMenu"><i class="fas fa-list"></i> Demandes</a>
-  <div class="collapse show ps-3" id="demandeMenu">
-    <a href="envoye.php" class="nav-link text-white">Demandes envoyées</a>
-    <a href="gerer.php" class="nav-link text-white">Gérer</a>
+  <h3 class="text-center mb-4">Inox_Industrie</h3>
+  <ul class="nav nav-pills flex-column mb-auto">
+    <li><a href="../acceuil.php" class="nav-link text-white"><i class="fas fa-home"></i> Accueil</a></li>
+    <li>
+      <a class="nav-link text-white" data-bs-toggle="collapse" href="#produitMenu">
+        <i class="fas fa-box"></i> Produits
+      </a>
+      <div class="collapse ps-3" id="produitMenu">
+        <a href="admin_add_product.php" class="nav-link text-white">Ajouter Produit</a>
+        <a href="afficher_produit.php" class="nav-link text-white">Afficher Produit</a>
+      </div>
+    </li>
+    <li><a href="envoye.php" class="nav-link text-white"><i class="fas fa-list"></i> Demandes</a></li>
+    <li><a href="../monprofil.php" class="nav-link text-white"><i class="fas fa-user"></i> Profil</a></li>
+    <li><a href="../deconnexion.php" class="nav-link text-danger"><i class="fas fa-sign-out-alt"></i> Déconnexion</a></li>
+  </ul>
+  <hr>
+  <div class="text-center">
+    <small>Bonjour <strong><?= htmlspecialchars($admin['username']); ?></strong> 👋</small>
   </div>
-</li>
-<li><a href="../profil/monprofil.php" class="nav-link text-white"><i class="fas fa-user"></i> Profil</a></li>
-<li><a href="../deconnexion.php" class="nav-link text-danger"><i class="fas fa-sign-out-alt"></i> Déconnexion</a></li>
-</ul>
-<hr>
-<div class="text-center">
-<small>Bonjour <strong><?= $d['username'] ?></strong> 👋</small>
 </div>
-</div>
+
 
 <div class="content">
 <h2 class="mb-4">Validation de la demande</h2>

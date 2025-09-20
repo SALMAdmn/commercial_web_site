@@ -13,7 +13,7 @@ if($conn->connect_error){
 // Récupération info admin
 $sql = "SELECT * FROM admin WHERE email='".$_SESSION['email']."'";
 $r = $conn->query($sql);
-$d = $r->fetch_assoc();
+$admin = $r->fetch_assoc(); // Utiliser $admin pour cohérence
 
 // --- Recherche ---
 $search = "";
@@ -56,32 +56,28 @@ body { min-height: 100vh; display: flex; }
 
 <!-- Sidebar -->
 <div class="sidebar d-flex flex-column p-3">
-<h3 class="text-center mb-4">Inox_Industrie</h3>
-<ul class="nav nav-pills flex-column mb-auto">
-<li><a href="../acceuil.php" class="nav-link text-white"><i class="fas fa-home"></i> Accueil</a></li>
-<li>
-  <a class="nav-link text-white" data-bs-toggle="collapse" href="#produitMenu"><i class="fas fa-box"></i> Produits</a>
-  <div class="collapse ps-3 show" id="produitMenu">
-    <a href="admin_add_product.php" class="nav-link text-white">Ajouter Produit</a>
-    <a href="afficher_produit.php" class="nav-link active bg-primary">Afficher Produit</a>
-    <a href="stock_moins3.php" class="nav-link text-white">Stock &lt; 3</a>
+  <h3 class="text-center mb-4">Inox_Industrie</h3>
+  <ul class="nav nav-pills flex-column mb-auto">
+    <li><a href="../acceuil.php" class="nav-link text-white"><i class="fas fa-home"></i> Accueil</a></li>
+    <li>
+      <a class="nav-link text-white" data-bs-toggle="collapse" href="#produitMenu">
+        <i class="fas fa-box"></i> Produits
+      </a>
+      <div class="collapse ps-3" id="produitMenu">
+        <a href="admin_add_product.php" class="nav-link text-white">Ajouter Produit</a>
+        <a href="afficher_produit.php" class="nav-link text-white">Afficher Produit</a>
+      </div>
+    </li>
+    <li><a href="envoye.php" class="nav-link text-white"><i class="fas fa-list"></i> Demandes</a></li>
+    <li><a href="../monprofil.php" class="nav-link text-white"><i class="fas fa-user"></i> Profil</a></li>
+    <li><a href="../deconnexion.php" class="nav-link text-danger"><i class="fas fa-sign-out-alt"></i> Déconnexion</a></li>
+  </ul>
+  <hr>
+  <div class="text-center">
+    <small>Bonjour <strong><?= htmlspecialchars($admin['username']); ?></strong> 👋</small>
   </div>
-</li>
-<li>
-  <a class="nav-link text-white" data-bs-toggle="collapse" href="#demandeMenu"><i class="fas fa-list"></i> Demandes</a>
-  <div class="collapse ps-3" id="demandeMenu">
-    <a href="envoye.php" class="nav-link text-white">Demandes envoyées</a>
-    <a href="gerer.php" class="nav-link text-white">Gérer</a>
-  </div>
-</li>
-<li><a href="../profil/monprofil.php" class="nav-link text-white"><i class="fas fa-user"></i> Profil</a></li>
-<li><a href="../deconnexion.php" class="nav-link text-danger"><i class="fas fa-sign-out-alt"></i> Déconnexion</a></li>
-</ul>
-<hr>
-<div class="text-center">
-<small>Bonjour <strong><?php echo $d['username']; ?></strong> 👋</small>
 </div>
-</div>
+
 
 <!-- Content -->
 <div class="content">
@@ -89,7 +85,7 @@ body { min-height: 100vh; display: flex; }
 
 <!-- Barre de recherche -->
 <form class="d-flex mb-3" method="get">
-<input type="text" name="search" class="form-control me-2" placeholder="Rechercher un produit" value="<?php echo htmlspecialchars($search); ?>">
+<input type="text" name="search" class="form-control me-2" placeholder="Rechercher un produit" value="<?= htmlspecialchars($search); ?>">
 <button class="btn btn-primary" type="submit"><i class="fas fa-search"></i></button>
 </form>
 
@@ -122,16 +118,16 @@ body { min-height: 100vh; display: flex; }
         }
     ?>
 <tr>
-<td><?php echo $row['id']; ?></td>
-<td><?php echo $row['nom']; ?></td>
-<td><?php echo $row['description']; ?></td>
-<td><?php echo $prix_affiche; ?></td>
-<td><?php echo $row['stock']; ?></td>
-<td><?php echo $row['categorie']; ?></td>
-<td><img src="../../assets/IMG/<?php echo $row['image']; ?>" alt="" width="60"></td>
+<td><?= $row['id']; ?></td>
+<td><?= htmlspecialchars($row['nom']); ?></td>
+<td><?= htmlspecialchars($row['description']); ?></td>
+<td><?= $prix_affiche; ?></td>
+<td><?= $row['stock']; ?></td>
+<td><?= htmlspecialchars($row['categorie']); ?></td>
+<td><img src="../../assets/IMG/<?= $row['image']; ?>" alt="" width="60"></td>
 <td>
-<a href="modifier_produit.php?id=<?php echo $row['id']; ?>" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i> Modifier</a>
-<a href="supprimer_produit.php?id=<?php echo $row['id']; ?>" class="btn btn-danger btn-sm" onclick="return confirm('Voulez-vous vraiment supprimer ce produit ?');"><i class="fas fa-trash"></i> Supprimer</a>
+<a href="modifier_produit.php?id=<?= $row['id']; ?>" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i> Modifier</a>
+<a href="supprimer_produit.php?id=<?= $row['id']; ?>" class="btn btn-danger btn-sm" onclick="return confirm('Voulez-vous vraiment supprimer ce produit ?');"><i class="fas fa-trash"></i> Supprimer</a>
 </td>
 </tr>
 <?php endwhile; ?>
@@ -143,7 +139,7 @@ body { min-height: 100vh; display: flex; }
 <ul class="pagination">
 <?php for($i = 1; $i <= $total_pages; $i++): ?>
 <li class="page-item <?php if($i==$page) echo 'active'; ?>">
-<a class="page-link" href="?page=<?php echo $i; ?>&search=<?php echo $search; ?>"><?php echo $i; ?></a>
+<a class="page-link" href="?page=<?= $i; ?>&search=<?= urlencode($search); ?>"><?= $i; ?></a>
 </li>
 <?php endfor; ?>
 </ul>
