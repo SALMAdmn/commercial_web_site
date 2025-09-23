@@ -12,39 +12,30 @@ $erreur = "";
 $con = mysqli_connect('localhost','root','','inox_industrie') or die("Impossible d'accéder au serveur");
 
 if(isset($_POST['email']) && isset($_POST['pass'])){
-    if(!empty($_POST['email']) && !empty($_POST['pass'])){
-        $email = mysqli_real_escape_string($con, $_POST['email']);
-        $sql = "SELECT * FROM admin WHERE email='$email'";
-        $result = mysqli_query($con, $sql) or die('Erreur lors de l\'exécution');
+    $email = mysqli_real_escape_string($con, $_POST['email']);
+    $password = $_POST['pass'];
 
-        if(mysqli_num_rows($result) == 0){
-            $erreur = "Email incorrect.";
-        } else {
-            $admin = mysqli_fetch_assoc($result);
+    $sql = "SELECT * FROM admin WHERE email='$email'";
+    $result = mysqli_query($con, $sql);
 
-            // Vérification du mot de passe
-            if($admin['password'] === $_POST['pass']){ // mot de passe en clair
-                $_SESSION['email'] = $admin['email'];
-                header('location: acceuil.php');
-                exit;
-            } else {
-                $erreur = "Mot de passe incorrect.";
-            }
-
-            // Si tu utilises password_hash pour sécuriser :
-            // if(password_verify($_POST['pass'], $admin['password'])){
-            //     $_SESSION['email'] = $admin['email'];
-            //     header('location: acceuil.php');
-            //     exit;
-            // } else {
-            //     $erreur = "Mot de passe incorrect.";
-            // }
-        }
-
+    if(mysqli_num_rows($result) == 0){
+        $erreur = "Email incorrect.";
     } else {
-        $erreur = "Remplir tous les champs.";
+        $admin = mysqli_fetch_assoc($result);
+
+        // Vérification sécurisée
+        if(password_verify($password, $admin['password'])){
+            $_SESSION['email'] = $admin['email'];
+            header('location: acceuil.php');
+            exit;
+        } else {
+            $erreur = "Mot de passe incorrect.";
+        }
     }
 }
+
+
+
 ?>
 <!DOCTYPE html>
 <html lang="fr">
