@@ -230,15 +230,35 @@ if (isset($_POST['add_cart'])) {
         <div class="container">
             <div class="row">
                 <div class="col-12">
-                    <ul class="filter-list">
-    <li class="active" data-filter="all">Tous les Produits</li>
-    <li data-filter="Alimentaire">Alimentaire</li>
-    <li data-filter="Construction">Construction</li>
-    <li data-filter="Transport">Transport</li>
-    <li data-filter="EnergieChimie">Énergie & Chimie</li>
-    <li data-filter="Domestique">Domestique</li>
-    <li data-filter="Medical">Médical</li>
+<?php
+$categorieActuelle = isset($_GET['categorie']) ? $_GET['categorie'] : "all";
+?>
+<ul class="filter-list">
+    <li class="<?= ($categorieActuelle=="all") ? "active" : "" ?>" data-filter="all">
+        <a href="produits.php?categorie=all" style="color: inherit; text-decoration: none;">Tous les Produits</a>
+    </li>
+    <li class="<?= ($categorieActuelle=="Alimentaire") ? "active" : "" ?>" data-filter="Alimentaire">
+        <a href="produits.php?categorie=Alimentaire" style="color: inherit; text-decoration: none;">Alimentaire</a>
+    </li>
+    <li class="<?= ($categorieActuelle=="Construction") ? "active" : "" ?>" data-filter="Construction">
+        <a href="produits.php?categorie=Construction" style="color: inherit; text-decoration: none;">Construction</a>
+    </li>
+    <li class="<?= ($categorieActuelle=="Transport") ? "active" : "" ?>" data-filter="Transport">
+        <a href="produits.php?categorie=Transport" style="color: inherit; text-decoration: none;">Transport</a>
+    </li>
+    <li class="<?= ($categorieActuelle=="Énergie & Chimie") ? "active" : "" ?>" data-filter="Énergie & Chimie">
+<a href="produits.php?categorie=<?= urlencode('Énergie & Chimie') ?>" style="color: inherit; text-decoration: none;">Énergie & Chimie</a>
+</li>
+
+    <li class="<?= ($categorieActuelle=="Domestique") ? "active" : "" ?>" data-filter="Domestique">
+        <a href="produits.php?categorie=Domestique" style="color: inherit; text-decoration: none;">Domestique</a>
+    </li>
+    <li class="<?= ($categorieActuelle=="Medical") ? "active" : "" ?>" data-filter="Medical">
+        <a href="produits.php?categorie=Medical" style="color: inherit; text-decoration: none;">Médical</a>
+    </li>
 </ul>
+
+
 
                 </div>
             </div>
@@ -284,21 +304,31 @@ if (isset($_POST['add_cart'])) {
               
               
 <?php
-// ----- Pagination -----
+// ----- Pagination + Filtrage -----
 $produitsParPage = 6; // nombre de produits par page
 $page = isset($_GET['page']) ? intval($_GET['page']) : 1;
 if ($page < 1) $page = 1;
 $offset = ($page - 1) * $produitsParPage;
 
+// Récupérer la catégorie (si envoyée dans l’URL)
+$categorie = isset($_GET['categorie']) ? $_GET['categorie'] : 'all';
+
+// Construire la condition WHERE
+$where = "";
+if ($categorie != "all") {
+    $where = "WHERE categorie='" . $conn->real_escape_string($categorie) . "'";
+}
+
 // ----- Récupérer produits avec LIMIT -----
-$sql = "SELECT * FROM produits LIMIT $offset, $produitsParPage";
+$sql = "SELECT * FROM produits $where LIMIT $offset, $produitsParPage";
 $result = $conn->query($sql);
 
 // ----- Compter le total pour pagination -----
-$totalResult = $conn->query("SELECT COUNT(*) as total FROM produits");
+$totalResult = $conn->query("SELECT COUNT(*) as total FROM produits $where");
 $totalRow = $totalResult->fetch_assoc();
 $totalProduits = $totalRow['total'];
 $totalPages = ceil($totalProduits / $produitsParPage);
+
 
 // ----- Affichage -----
 if($result->num_rows > 0){
