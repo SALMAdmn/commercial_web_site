@@ -713,15 +713,18 @@ session_start(); // Toujours démarrer la session en haut de la page
                 <!-- About Company -->
                 <div class="col-lg-4 col-md-6 mb-4">
                     <div class="footer-widget">
-                        <h3 class="footer-logo mb-3">Elite<span style="color: var(--secBule);">Machinery</span></h3>
-                        <p class="mb-4">Leading industrial manufacturing solutions provider since 1995. We deliver precision-engineered components for critical applications worldwide.</p>
+                        <h3 class="footer-logo mb-3">INOX<span style="color: var(--secBule);"> INDUSTRIE</span></h3>
+                        <p class="mb-4">Spécialistes de la fabrication et de la transformation de l’inox, 
+    nous proposons des solutions sur mesure alliant qualité, durabilité et précision. 
+    Grâce à notre expertise et à des technologies modernes, nous accompagnons nos clients 
+    dans la réalisation de projets industriels fiables et performants.</p>
                         
                         <div class="social-icons">
-                            <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
-                            <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
-                            <a href="#" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
-                            <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
-                            <a href="#" class="social-icon"><i class="fab fa-youtube"></i></a>
+                            <a href="https://www.facebook.com/profile.php?id=100076252924876" class="social-icon"><i class="fab fa-facebook-f"></i></a>
+                            <a href="https://www.facebook.com/profile.php?id=100076252924876" class="social-icon"><i class="fab fa-twitter"></i></a>
+                            <a href="https://www.linkedin.com/company/inoxindustrie/posts/?feedView=all" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
+                            <a href="https://www.facebook.com/profile.php?id=100076252924876" class="social-icon"><i class="fab fa-instagram"></i></a>
+                            <a href="https://www.facebook.com/profile.php?id=100076252924876" class="social-icon"><i class="fab fa-youtube"></i></a>
                         </div>
                     </div>
                 </div>
@@ -729,52 +732,51 @@ session_start(); // Toujours démarrer la session en haut de la page
                 <!-- Quick Links -->
                 <div class="col-lg-2 col-md-6 mb-4">
                     <div class="footer-widget">
-                        <h4 class="widget-title mb-4">Quick Links</h4>
+                        <h4 class="widget-title mb-4">Liens rapides</h4>
                         <ul class="footer-links">
-                            <li><a href="index.html"><i class="fas fa-chevron-right me-2"></i> Home</a></li>
-                            <li><a href="about-us.html"><i class="fas fa-chevron-right me-2"></i> About Us</a></li>
-                            <li><a href="capabilities.html"><i class="fas fa-chevron-right me-2"></i> Our Capabilities</a></li>
-                            <li><a href="industries.html"><i class="fas fa-chevron-right me-2"></i> Industries</a></li>
-                            <li><a href="case-studies.html"><i class="fas fa-chevron-right me-2"></i> Case Studies</a></li>
-                            <li><a href="contact.html"><i class="fas fa-chevron-right me-2"></i> Contact</a></li>
+                            <li><a href="index.php"><i class="fas fa-chevron-right me-2"></i> Accueil</a></li>
+                            <li><a href="apropos.php"><i class="fas fa-chevron-right me-2"></i> À propos</a></li>
+                            <li><a href="produits.php"><i class="fas fa-chevron-right me-2"></i> Produits</a></li>
+                            <li><a href="contact.php"><i class="fas fa-chevron-right me-2"></i> Contact</a></li>
                         </ul>
                     </div>
                 </div>
 
-                <!-- Our Services -->
-                <div class="col-lg-3 col-md-6 mb-4">
-                    <div class="footer-widget">
-                        <h4 class="widget-title mb-4">Our Services</h4>
-                        <ul class="footer-links">
-                            <li><a href="service.html"><i class="fas fa-chevron-right me-2"></i> CNC Machining</a></li>
-                            <li><a href="service.html"><i class="fas fa-chevron-right me-2"></i> Metal Fabrication</a></li>
-                            <li><a href="service.html"><i class="fas fa-chevron-right me-2"></i> Precision Engineering</a></li>
-                            <li><a href="service.html"><i class="fas fa-chevron-right me-2"></i> Industrial Automation</a></li>
-                            <li><a href="service.html"><i class="fas fa-chevron-right me-2"></i> Quality Control</a></li>
-                        </ul>
-                    </div>
-                </div>
+                               <!-- Catégories Produits -->
+<div class="col-lg-3 col-md-6 mb-4">
+    <div class="footer-widget">
+        <h4 class="widget-title mb-4">Catégories Produits</h4>
+        <ul class="footer-links">
+            <li><a href="produits.php?categorie=Alimentaire"><i class="fas fa-chevron-right me-2"></i> Alimentaire</a></li>
+            <li><a href="produits.php?categorie=Construction"><i class="fas fa-chevron-right me-2"></i> Construction</a></li>
+            <li><a href="produits.php?categorie=Transport"><i class="fas fa-chevron-right me-2"></i> Transport</a></li>
+            <li><a href="produits.php?categorie=<?= urlencode('Énergie & Chimie') ?>"><i class="fas fa-chevron-right me-2"></i> Énergie & Chimie</a></li>
+            <li><a href="produits.php?categorie=Domestique"><i class="fas fa-chevron-right me-2"></i> Domestique</a></li>
+            <li><a href="produits.php?categorie=Medical"><i class="fas fa-chevron-right me-2"></i> Médical</a></li>
+        </ul>
+    </div>
+</div>
 
                 <!-- Contact Info -->
                 <div class="col-lg-3 col-md-6 mb-4">
                     <div class="footer-widget">
-                        <h4 class="widget-title mb-4">Contact Us</h4>
+                        <h4 class="widget-title mb-4">Contactez-nous</h4>
                         <ul class="footer-contact">
                             <li class="mb-3">
                                 <i class="fas fa-map-marker-alt me-3" style="color: var(--secBule);"></i>
-                                <span>Industrial Zone 45, Building 12, Cairo, Egypt</span>
+                                <span>3 lot hasna jabrane, Av Khalil Jabran El Jadida</span>
                             </li>
                             <li class="mb-3">
                                 <i class="fas fa-phone-alt me-3" style="color: var(--secBule);"></i>
-                                <span>+20 123 456 7890</span>
+                                <span>+05 22 46 03 04</span>
                             </li>
                             <li class="mb-3">
                                 <i class="fas fa-envelope me-3" style="color: var(--secBule);"></i>
-                                <span>info@elitemachinery.com</span>
+                                <span>contact@bowerindustrie.ma</span>
                             </li>
                             <li class="mb-3">
                                 <i class="fas fa-clock me-3" style="color: var(--secBule);"></i>
-                                <span>Mon-Fri: 8:00 - 17:00</span>
+                                <span>lun - ven: 08h30-18h00</span>
                             </li>
                         </ul>
                     </div>
@@ -784,8 +786,7 @@ session_start(); // Toujours démarrer la session en haut de la page
             <!-- Copyright-->
             <div class="row pt-3 border-top border-secondary copyright">
                 <div class="mb-3 text-center">
-                    <p class="mb-0">&copy; 2025 EliteMachinery. All Rights Reserved.</p>
-                    <span class="d-block d-sm-inline mt-2 mt-sm-0">Powered By: <a href="https://ideaworldweb.com" target="_blank" style="color: var(--secBule);">Idea World Web</a></span>
+                    <p class="mb-0">&copy; 2025 INOX INDUSTRIE. Tous droits réservés.</p>
                 </div>
             </div>
         </div>

@@ -1,7 +1,6 @@
 <?php
 session_start(); // Toujours démarrer la session en haut de la page
-?>
-<?php
+
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
@@ -9,58 +8,118 @@ require 'phpmailer/src/Exception.php';
 require 'phpmailer/src/PHPMailer.php';
 require 'phpmailer/src/SMTP.php';
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $nom    = $_POST['nom'];
-    $email  = $_POST['email'];
-    $objet  = $_POST['objet'];
-    $message= $_POST['message'];
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['form_type'])) {
 
-    $mail = new PHPMailer(true);
+    if ($_POST['form_type'] === "contact") {
+        $nom     = trim($_POST['nom'] ?? '');
+        $email   = trim($_POST['email'] ?? '');
+        $objet   = trim($_POST['objet'] ?? '');
+        $message = trim($_POST['message'] ?? '');
+
+        try {
+            $mail = new PHPMailer(true);
+            $mail->isSMTP();
+            $mail->Host       = 'smtp.gmail.com';
+            $mail->SMTPAuth   = true;
+            $mail->Username   = 'salmadahmane2005@gmail.com';
+            $mail->Password   = 'qevcmufchamqbpoc'; // mot de passe d’application
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+            $mail->Port       = 587;
+
+            $mail->setFrom($email, $nom);
+            $mail->addAddress('salmadahmane970@gmail.com');
+
+            $mail->isHTML(true);
+            $mail->Subject = $objet;
+            $mail->Body    = "<h3>Nom : $nom</h3>
+                              <h3>Email : $email</h3>
+                              <p>Message : $message</p>";
+
+            if ($mail->send()) {
+                echo '<script>
+                    document.addEventListener("DOMContentLoaded", function() {
+                        var myModal = new bootstrap.Modal(document.getElementById("successModal"));
+                        myModal.show();
+                    });
+                </script>';
+            } else {
+                echo '<script>alert("Erreur lors de l\'envoi : ' . $mail->ErrorInfo . '");</script>';
+            }
+        } catch (Exception $e) {
+            echo '<script>
+                document.addEventListener("DOMContentLoaded", function() {
+                    var myModal = new bootstrap.Modal(document.getElementById("errorModal"));
+                    myModal.show();
+                });
+            </script>';
+        }
+    }
+
+    elseif ($_POST['form_type'] === "quote") {
+    $quoteName    = trim($_POST['quoteName'] ?? '');
+    $quoteEmail   = trim($_POST['quoteEmail'] ?? '');
+    $quotePhone   = trim($_POST['quotePhone'] ?? '');
+    $quoteService = trim($_POST['quoteService'] ?? '');
+    $quoteDetails = trim($_POST['quoteDetails'] ?? '');
 
     try {
-        // Config SMTP
+        $mail = new PHPMailer(true);
         $mail->isSMTP();
         $mail->Host       = 'smtp.gmail.com';
         $mail->SMTPAuth   = true;
-        $mail->Username   = 'salmadahmane2005@gmail.com'; // ton email Gmail
-        $mail->Password   = 'qevc mufc hamq bpoc'; // mot de passe d'application
+        $mail->Username   = 'salmadahmane2005@gmail.com';
+        $mail->Password   = 'qevcmufchamqbpoc';
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port       = 587;
 
-        // Destinataires
-        $mail->setFrom($email, $nom);
-        $mail->addAddress('salmadahmane970@gmail.com'); // destinataire
+        $mail->setFrom($quoteEmail, $quoteName);
+        $mail->addAddress('salmadahmane970@gmail.com');
 
-        // Contenu
+        // Contenu HTML
         $mail->isHTML(true);
-        $mail->Subject = $objet;
-        $mail->Body    = "<h3>Nom : $nom</h3>
-                          <h3>Email : $email</h3>
-                          <p>Message : $message</p>";
+        $mail->Subject = "Demande de devis";
+        $mail->Body    = "
+            <h3>Nom : {$quoteName}</h3>
+            <h3>Email : {$quoteEmail}</h3>
+            <h3>Téléphone : {$quotePhone}</h3>
+            <h3>Service : {$quoteService}</h3>
+            <p>Détails : {$quoteDetails}</p>
+        ";
+
+        // **Gestion des fichiers uploadés**
+        if (!empty($_FILES['quoteFile']) && is_array($_FILES['quoteFile']['name'])) {
+            for ($i = 0; $i < count($_FILES['quoteFile']['name']); $i++) {
+                if ($_FILES['quoteFile']['error'][$i] === UPLOAD_ERR_OK) {
+                    $tmpName = $_FILES['quoteFile']['tmp_name'][$i];
+                    $name    = $_FILES['quoteFile']['name'][$i];
+                    $mail->addAttachment($tmpName, $name);
+                }
+            }
+        }
 
         if ($mail->send()) {
-    echo '<script>
-        document.addEventListener("DOMContentLoaded", function() {
-            var myModal = new bootstrap.Modal(document.getElementById("successModal"));
-            myModal.show();
-        });
-    </script>';
-} else {
-    echo '<script>
-        alert("Erreur lors de l\'envoi : ' . $mail->ErrorInfo . '");
-    </script>';
-}
-
+            echo '<script>
+                document.addEventListener("DOMContentLoaded", function() {
+                    var myModal = new bootstrap.Modal(document.getElementById("successModal"));
+                    myModal.show();
+                });
+            </script>';
+        } else {
+            echo '<script>alert("Erreur lors de l\'envoi : ' . $mail->ErrorInfo . '");</script>';
+        }
     } catch (Exception $e) {
-    echo '<script>
-        document.addEventListener("DOMContentLoaded", function() {
-            var myModal = new bootstrap.Modal(document.getElementById("errorModal"));
-            myModal.show();
-        });
-    </script>';
+        echo '<script>
+            document.addEventListener("DOMContentLoaded", function() {
+                var myModal = new bootstrap.Modal(document.getElementById("errorModal"));
+                myModal.show();
+            });
+        </script>';
     }
 }
+
+}
 ?>
+
 
 
 
@@ -174,12 +233,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <li class="nav-item">
                         <a class="nav-link" href="apropos.php">À propos</a>
                     </li>
-                    <!-- <li class="nav-item">
-                        <a class="nav-link" href="capabilities.html">Our Capabilities</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="industries.html">Industries</a>
-                    </li> -->
+                    
                     <li class="nav-item">
                         <a class="nav-link" href="produits.php">Produits</a>
                     </li>
@@ -279,15 +333,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link active" id="contact-tab" data-bs-toggle="tab" data-bs-target="#contact" type="button" role="tab">Contactez-nous</button>
                             </li>
-                            <!-- <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="quote-tab" data-bs-toggle="tab" data-bs-target="#quote-pane" type="button" role="tab">Request a Quote</button>
-                            </li> -->
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="quote-tab" data-bs-toggle="tab" data-bs-target="#quote-pane" type="button" role="tab">Demander un devis</button>
+                            </li>
                         </ul>
                         
                         <div class="tab-content p-4 border border-top-0" id="contactTabContent">
                             <!-- Contact Form -->
                             <div class="tab-pane fade show active" id="contact" role="tabpanel">
                                 <form id="contactForm" action="" method="POST">
+                                        <input type="hidden" name="form_type" value="contact">
+
                                     <div class="row g-3">
                                         <div class="col-md-6">
                                             <div class="form-floating">
@@ -320,61 +376,65 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                 </form>
                             </div>
                             
-                            <!-- Quote Form -->
-                            <!-- <div class="tab-pane fade" id="quote-pane" role="tabpanel">
-                                <form id="quoteForm">
-                                    <div class="row g-3">
-                                        <div class="col-md-6">
-                                            <div class="form-floating">
-                                                <input type="text" class="form-control" id="quoteName" placeholder="Your Name" required>
-                                                <label for="quoteName">Your Name</label>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="form-floating">
-                                                <input type="email" class="form-control" id="quoteEmail" placeholder="Your Email" required>
-                                                <label for="quoteEmail">Your Email</label>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="form-floating">
-                                                <input type="tel" class="form-control" id="quotePhone" placeholder="Phone Number" required>
-                                                <label for="quotePhone">Phone Number</label>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="form-floating">
-                                                <select class="form-select" id="quoteService" required>
-                                                    <option value="" selected disabled>Select Service</option>
-                                                    <option value="cnc">CNC Machining</option>
-                                                    <option value="fabrication">Metal Fabrication</option>
-                                                    <option value="precision">Precision Engineering</option>
-                                                    <option value="automation">Industrial Automation</option>
-                                                </select>
-                                                <label for="quoteService">Service Needed</label>
-                                            </div>
-                                        </div>
-                                        <div class="col-12">
-                                            <div class="form-floating">
-                                                <textarea class="form-control" id="quoteDetails" style="height: 120px" placeholder="Project Details" required></textarea>
-                                                <label for="quoteDetails">Project Details</label>
-                                            </div>
-                                        </div>
-                                        <div class="col-12">
-                                            <div class="form-group">
-                                                <label for="quoteFile" class="mb-2">Upload Files (Drawings, Specifications)</label>
-                                                <input type="file" class="form-control" id="quoteFile" multiple>
-                                            </div>
-                                        </div>
-                                        <div class="col-12">
-                                            <button type="submit" class="btn btn-custom">Request Quote</button>
-                                        </div>
-                                    </div>
-                                </form>
+          <!-- Quote Form -->
+<div class="tab-pane fade" id="quote-pane" role="tabpanel">
+    <form id="quoteForm" action="contact.php" method="POST" enctype="multipart/form-data">
+    <input type="hidden" name="form_type" value="quote">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <div class="form-floating">
+                    <input type="text" name="quoteName" class="form-control" id="quoteName" placeholder="Votre nom" required>
+                    <label for="quoteName">Votre nom</label>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-floating">
+                    <input type="email" name="quoteEmail" class="form-control" id="quoteEmail" placeholder="Votre Email" required>
+                    <label for="quoteEmail">Votre Email</label>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-floating">
+                    <input type="tel" name="quotePhone" class="form-control" id="quotePhone" placeholder="Numéro de téléphone" required>
+                    <label for="quotePhone">Numéro de téléphone</label>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-floating">
+                    <select class="form-select" name="quoteService" id="quoteService" required>
+                        <option value="" selected disabled>Sélectionner un service</option>
+                        <option value="Fabrication et transformation de l’inox">Fabrication et transformation de l’inox</option>
+                        <option value="Conception et ingénierie">Conception et ingénierie</option>
+                        <option value="Production de pièces et équipements">Production de pièces et équipements</option>
+                        <option value="Maintenance et service après-vente">Maintenance et service après-vente</option>
+                        <option value="Services complémentaires">Services complémentaires</option>
+                    </select>
+                    <label for="quoteService">Service requis</label>
+                </div>
+            </div>
+            <div class="col-12">
+                <div class="form-floating">
+                    <textarea class="form-control" name="quoteDetails" id="quoteDetails" style="height: 120px" placeholder="Détails du projet" required></textarea>
+                    <label for="quoteDetails">Détails du projet</label>
+                </div>
+            </div>
+            <div class="col-12">
+                <div class="form-group">
+                    <label for="quoteFile" class="mb-2">Télécharger des fichiers (dessins, spécifications)</label>
+                    <input type="file" name="quoteFile[]" class="form-control" id="quoteFile" multiple>
+                </div>
+            </div>
+            <div class="col-12">
+                <button type="submit" class="btn btn-custom">Demander un devis</button>
+            </div>
+        </div>
+    </form>
+</div>
+
                             </div>
                         </div>
                     </div>
-                </div> -->
+                </div>
             </div>
         </div>
     </section>
@@ -404,7 +464,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <div class="col-lg-4 col-md-6 mb-4">
                     <div class="footer-widget">
                         <h3 class="footer-logo mb-3">INOX<span style="color: var(--secBule);"> INDUSTRIE</span></h3>
-                        <p class="mb-4">Leading industrial manufacturing solutions provider since 1995. We deliver precision-engineered components for critical applications worldwide.</p>
+                        <p class="mb-4">Spécialistes de la fabrication et de la transformation de l’inox, 
+    nous proposons des solutions sur mesure alliant qualité, durabilité et précision. 
+    Grâce à notre expertise et à des technologies modernes, nous accompagnons nos clients 
+    dans la réalisation de projets industriels fiables et performants.</p>
                         
                         <div class="social-icons">
                             <a href="https://www.facebook.com/profile.php?id=100076252924876" class="social-icon"><i class="fab fa-facebook-f"></i></a>
@@ -421,27 +484,28 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <div class="footer-widget">
                         <h4 class="widget-title mb-4">Liens rapides</h4>
                         <ul class="footer-links">
-                            <li><a href="index.html"><i class="fas fa-chevron-right me-2"></i> Accueil</a></li>
-                            <li><a href="about-us.html"><i class="fas fa-chevron-right me-2"></i> À propos</a></li>
-                            <li><a href="produit.php"><i class="fas fa-chevron-right me-2"></i> Produits</a></li>
+                            <li><a href="index.php"><i class="fas fa-chevron-right me-2"></i> Accueil</a></li>
+                            <li><a href="apropos.php"><i class="fas fa-chevron-right me-2"></i> À propos</a></li>
+                            <li><a href="produits.php"><i class="fas fa-chevron-right me-2"></i> Produits</a></li>
                             <li><a href="contact.php"><i class="fas fa-chevron-right me-2"></i> Contact</a></li>
                         </ul>
                     </div>
                 </div>
 
-                <!-- Our Services -->
-                <div class="col-lg-3 col-md-6 mb-4">
-                    <div class="footer-widget">
-                        <h4 class="widget-title mb-4">Our Services</h4>
-                        <ul class="footer-links">
-                            <li><a href="service.html"><i class="fas fa-chevron-right me-2"></i> CNC Machining</a></li>
-                            <li><a href="service.html"><i class="fas fa-chevron-right me-2"></i> Metal Fabrication</a></li>
-                            <li><a href="service.html"><i class="fas fa-chevron-right me-2"></i> Precision Engineering</a></li>
-                            <li><a href="service.html"><i class="fas fa-chevron-right me-2"></i> Industrial Automation</a></li>
-                            <li><a href="service.html"><i class="fas fa-chevron-right me-2"></i> Quality Control</a></li>
-                        </ul>
-                    </div>
-                </div>
+                               <!-- Catégories Produits -->
+<div class="col-lg-3 col-md-6 mb-4">
+    <div class="footer-widget">
+        <h4 class="widget-title mb-4">Catégories Produits</h4>
+        <ul class="footer-links">
+            <li><a href="produits.php?categorie=Alimentaire"><i class="fas fa-chevron-right me-2"></i> Alimentaire</a></li>
+            <li><a href="produits.php?categorie=Construction"><i class="fas fa-chevron-right me-2"></i> Construction</a></li>
+            <li><a href="produits.php?categorie=Transport"><i class="fas fa-chevron-right me-2"></i> Transport</a></li>
+            <li><a href="produits.php?categorie=<?= urlencode('Énergie & Chimie') ?>"><i class="fas fa-chevron-right me-2"></i> Énergie & Chimie</a></li>
+            <li><a href="produits.php?categorie=Domestique"><i class="fas fa-chevron-right me-2"></i> Domestique</a></li>
+            <li><a href="produits.php?categorie=Medical"><i class="fas fa-chevron-right me-2"></i> Médical</a></li>
+        </ul>
+    </div>
+</div>
 
                 <!-- Contact Info -->
                 <div class="col-lg-3 col-md-6 mb-4">
@@ -524,24 +588,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     </div>
   </div>
 </div>
-<!-- Modal pour connexion obligatoire -->
-<div class="modal fade" id="connectModal" tabindex="-1" aria-labelledby="connectModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="connectModalLabel">Attention</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
-      </div>
-      <div class="modal-body">
-        Vous devez être connecté pour accéder au panier !
-      </div>
-      <div class="modal-footer">
-        <a href="SignIn-SignUp-Form-main/login.php" class="btn btn-primary">Se connecter</a>
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-      </div>
-    </div>
-  </div>
-</div>
 
 <!-- Modal pour connexion obligatoire -->
 <div class="modal fade" id="connectModal" tabindex="-1" aria-labelledby="connectModalLabel" aria-hidden="true">
@@ -564,6 +610,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 
 
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // Vérifie si l'URL contient #quote-pane
+    if (window.location.hash === "#quote-pane") {
+        var tabTrigger = document.querySelector('a[href="#quote-pane"]');
+        if (tabTrigger) {
+            var tab = new bootstrap.Tab(tabTrigger);
+            tab.show();
+        }
+    }
+});
+</script>
 
 
 </body>

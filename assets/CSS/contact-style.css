@@ -1,32 +1,6 @@
-
-#quote-tab,
-#quote-pane {
-    display: none !important;
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+/* laisse Bootstrap faire le boulot — pas besoin d'ajouter ceci normalement */
+/* .tab-pane { display: none; }
+.tab-pane.show.active { display: block; } */
 
 
 
