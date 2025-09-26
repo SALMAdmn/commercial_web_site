@@ -215,7 +215,7 @@ if (isset($_POST['add_cart'])) {
                     <!-- Breadcrumb -->
                     <nav aria-label="breadcrumb" data-aos="fade-up" data-aos-delay="200">
                         <ol class="breadcrumb justify-content-center position-relative">
-                            <li class="breadcrumb-item"><a href="index.html" class="text-light">Accueil</a></li>
+                            <li class="breadcrumb-item"><a href="index.php" class="text-light">Accueil</a></li>
                             <li class="breadcrumb-item active" aria-current="page">Produits</li>
                         </ol>
                     </nav>

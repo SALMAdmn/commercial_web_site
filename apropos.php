@@ -170,7 +170,7 @@ session_start(); // Toujours démarrer la session en haut de la page
                     
                     <nav aria-label="breadcrumb" data-aos="fade-up" data-aos-delay="200">
                         <ol class="breadcrumb justify-content-center ">
-                            <li class="breadcrumb-item"><a href="index.html" class="text-light">Accueil</a></li>
+                            <li class="breadcrumb-item"><a href="index.php" class="text-light">Accueil</a></li>
                             <li class="breadcrumb-item active" aria-current="page">À propos</li>
                         </ol>
                     </nav>
