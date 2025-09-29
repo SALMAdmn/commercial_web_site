@@ -35,6 +35,7 @@ if(isset($_POST['valider_envoi'])){
 
         if(move_uploaded_file($_FILES['preuve']['tmp_name'], $upload_dir.$filename)){
             $conn->query("UPDATE demandes SET preuve='$filename', statut='valide', date_validation=NOW() WHERE id=$id");
+            
             $demande['preuve'] = $filename;
             $demande['statut'] = 'valide';
             $demande['date_validation'] = date('Y-m-d H:i:s');
