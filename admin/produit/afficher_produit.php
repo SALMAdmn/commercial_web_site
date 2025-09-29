@@ -27,13 +27,19 @@ $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $offset = ($page - 1) * $limit;
 
 // Compter le total
-$count_sql = "SELECT COUNT(*) as total FROM produits WHERE nom LIKE '%$search%'";
+$count_sql = "SELECT COUNT(*) as total 
+              FROM produits 
+              WHERE nom LIKE '%$search%' 
+                 OR id = '$search'";
 $count_result = $conn->query($count_sql);
 $total_rows = $count_result->fetch_assoc()['total'];
 $total_pages = ceil($total_rows / $limit);
 
 // Récupérer les produits
-$sql = "SELECT * FROM produits WHERE nom LIKE '%$search%' LIMIT $limit OFFSET $offset";
+$sql = "SELECT * FROM produits 
+        WHERE nom LIKE '%$search%' 
+           OR id = '$search' 
+        LIMIT $limit OFFSET $offset";
 $result = $conn->query($sql);
 ?>
 

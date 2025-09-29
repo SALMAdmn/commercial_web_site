@@ -23,8 +23,9 @@ $res = $conn->query("SELECT COUNT(*) as total FROM demandes WHERE statut='valide
 $nb_valide = $res->fetch_assoc()['total'];
 
 // Nombre de demandes non validées
-$res = $conn->query("SELECT COUNT(*) as total FROM demandes WHERE statut='en_attente'");
+$res = $conn->query("SELECT COUNT(*) as total FROM demandes WHERE statut='' OR statut IS NULL");
 $nb_non_valide = $res->fetch_assoc()['total'];
+
 
 // Nombre d'admins
 $res = $conn->query("SELECT COUNT(*) as total FROM admin");

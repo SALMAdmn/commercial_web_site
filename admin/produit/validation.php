@@ -25,7 +25,6 @@ if(!$demande){
     die("Demande introuvable.");
 }
 
-// Traitement du formulaire
 if(isset($_POST['valider_envoi'])){
     if(isset($_FILES['preuve']) && $_FILES['preuve']['error'] == 0){
         $ext = pathinfo($_FILES['preuve']['name'], PATHINFO_EXTENSION);
@@ -39,14 +38,15 @@ if(isset($_POST['valider_envoi'])){
             $demande['preuve'] = $filename;
             $demande['statut'] = 'valide';
             $demande['date_validation'] = date('Y-m-d H:i:s');
-            $success = "La preuve a été uploadée et la demande validée.";
+            $success = "Preuve uploadée, demande validée.";
         } else {
             $error = "Erreur lors de l'upload du fichier.";
         }
     } else {
-        $error = "Veuillez sélectionner une image.";
+        $error = "Veuillez fournir une preuve pour valider.";
     }
 }
+
 ?>
 
 <!DOCTYPE html>
@@ -110,7 +110,8 @@ body { min-height: 100vh; display: flex; }
 <?php
 $produits = json_decode($demande['produits'], true);
 foreach($produits as $p){
-    echo "- ".htmlspecialchars($p['nom'])." x".$p['quantite']." (".$p['prix']." DH)<br>";
+$prix = isset($p['prix']) ? $p['prix'] : (isset($p['prix_total']) ? $p['prix_total'] : (isset($p['prix_unitaire']) ? $p['prix_unitaire'] * intval($p['quantite']) : 0));
+echo "- ".htmlspecialchars($p['nom'])." x".intval($p['quantite'])." ($prix DH)<br>";
 }
 ?>
 </p>

@@ -11,7 +11,7 @@ if($conn->connect_error){
 }
 
 // Récupération info admin
-$sql = "SELECT * FROM admin WHERE email='".$_SESSION['email']."'";
+$sql = "SELECT * FROM admin WHERE email='".$conn->real_escape_string($_SESSION['email'])."'";
 $r = $conn->query($sql);
 $admin = $r->fetch_assoc();
 
@@ -25,7 +25,7 @@ $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $offset = ($page - 1) * $limit;
 
 // --- Compter le total ---
-$count_sql = "SELECT COUNT(*) as total FROM demandes WHERE 1 ";
+$count_sql = "SELECT COUNT(*) as total FROM demandes WHERE 1";
 if($search != ''){
     if(is_numeric($search)){
         $count_sql .= " AND id = " . intval($search);
@@ -33,17 +33,18 @@ if($search != ''){
         $count_sql .= " AND email LIKE '%$search%'";
     }
 }
-if($filter_status == 'valide'){
-    $count_sql .= " AND statut='valide'";
-} elseif($filter_status == 'en_attente'){
-    $count_sql .= " AND statut='en_attente'";
-}
+// if($filter_status == 'valide'){
+//     $count_sql .= " AND statut='valide'";
+// } elseif($filter_status == 'en_attente'){
+//     $count_sql .= " AND statut='en_attente'";
+// }
+
 $count_result = $conn->query($count_sql);
 $total_rows = $count_result->fetch_assoc()['total'];
 $total_pages = ceil($total_rows / $limit);
 
-// --- Récupérer les demandes avec limit/offset ---
-$sql = "SELECT * FROM demandes WHERE 1 ";
+// --- Récupérer les demandes ---
+$sql = "SELECT * FROM demandes WHERE 1";
 if($search != ''){
     if(is_numeric($search)){
         $sql .= " AND id = " . intval($search);
@@ -51,11 +52,21 @@ if($search != ''){
         $sql .= " AND email LIKE '%$search%'";
     }
 }
+// if($filter_status == 'valide'){
+//     $sql .= " AND statut='valide'";
+// } elseif($filter_status == 'en_attente'){
+//     $sql .= " AND statut='en_attente'";
+// }
 if($filter_status == 'valide'){
+    $count_sql .= " AND statut='valide'";
     $sql .= " AND statut='valide'";
 } elseif($filter_status == 'en_attente'){
-    $sql .= " AND statut='en_attente'";
+    $count_sql .= " AND (statut='' OR statut IS NULL)";
+    $sql .= " AND (statut='' OR statut IS NULL)";
 }
+
+
+
 $sql .= " ORDER BY date_demande DESC LIMIT $limit OFFSET $offset";
 $result = $conn->query($sql);
 ?>
@@ -73,11 +84,17 @@ body { min-height: 100vh; display: flex; }
 .sidebar a { color: #fff; text-decoration: none; }
 .sidebar a:hover { background: #1040a6ff; color: #fff; }
 .content { flex-grow: 1; padding: 20px; background: #f8f9fa; }
+/* Uniformiser largeur boutons actions */
+td form .btn,
+td a.btn {
+    min-width: 100px;  /* ajuste selon ton besoin */
+    text-align: center;
+}
+
 </style>
 </head>
 <body>
 
-<!-- Sidebar identique aux autres pages -->
 <div class="sidebar d-flex flex-column p-3">
   <h3 class="text-center mb-4">Inox_Industrie</h3>
   <ul class="nav nav-pills flex-column mb-auto">
@@ -101,11 +118,9 @@ body { min-height: 100vh; display: flex; }
   </div>
 </div>
 
-<!-- Content -->
 <div class="content">
 <h2>Demandes envoyées</h2>
 
-<!-- Barre de recherche et filtres -->
 <form class="row g-2 mb-3" method="get">
   <div class="col-auto">
     <input type="text" name="search" class="form-control" placeholder="Recherche ID ou Email" value="<?= htmlspecialchars($search); ?>">
@@ -117,7 +132,8 @@ body { min-height: 100vh; display: flex; }
     <a href="?status=valide<?= $search != '' ? '&search='.urlencode($search) : ''; ?>" class="btn btn-success">Validées</a>
     <a href="?status=en_attente<?= $search != '' ? '&search='.urlencode($search) : ''; ?>" class="btn btn-warning">Non validées</a>
     <a href="envoye.php" class="btn btn-secondary">Tout</a>
-  </div>
+</div>
+
 </form>
 
 <table class="table table-bordered table-hover align-middle">
@@ -142,18 +158,27 @@ body { min-height: 100vh; display: flex; }
 <td>
 <?php
 $produits = json_decode($row['produits'], true);
-foreach($produits as $p){
-    echo htmlspecialchars($p['nom'])." x".$p['quantite']." (".$p['prix']." DH)<br>";
+if (is_array($produits)) {
+    foreach ($produits as $p) {
+        $nom = htmlspecialchars($p['nom']);
+        $qte = intval($p['quantite']);
+        $prix = isset($p['prix']) ? $p['prix'] : (isset($p['prix_total']) ? $p['prix_total'] : (isset($p['prix_unitaire']) ? $p['prix_unitaire'] * $qte : 0));
+        echo "$nom x$qte ($prix DH)<br>";
+    }
 }
 ?>
 </td>
 <td><?= $row['total']; ?> DH</td>
 <td>
-<?php if($row['statut']=='en_attente'): ?>
-<span class="badge bg-warning">En attente</span>
-<?php else: ?>
-<span class="badge bg-success">Validée</span>
-<?php endif; ?>
+<?php
+$status = strtolower(trim($row['statut']));
+if($status === 'valide' && !empty($row['preuve'])){
+    echo '<span class="badge bg-success">Validée</span>';
+} else {
+    echo '<span class="badge bg-warning">En attente</span>';
+}
+?>
+
 </td>
 <td><?= $row['date_demande']; ?></td>
 <td><?= $row['date_validation'] ?: '-'; ?></td>
@@ -165,35 +190,42 @@ foreach($produits as $p){
 <?php else: ?> - <?php endif; ?>
 </td>
 <td>
-<a class="btn btn-sm btn-info" target="_blank"
-   href="https://mail.google.com/mail/?view=cm&fs=1&to=<?= urlencode($row['email']); ?>">
-   📧 Contacter
-</a>
-<?php if($row['statut']=='en_attente'): ?>
-<a class="btn btn-sm btn-success"
-   href="validation.php?id=<?= $row['id']; ?>">
-   ✅ Valider
-</a>
+    <a class="btn btn-sm btn-info" target="_blank"
+       href="https://mail.google.com/mail/?view=cm&fs=1&to=<?= urlencode($row['email']); ?>">
+       📧 Contacter
+    </a>
+
+<?php if(empty($row['preuve'])): ?>
+    <form method="post" action="validation.php?id=<?= $row['id']; ?>" style="display:inline;">
+        <button type="submit" class="btn btn-sm btn-success">✅ Valider</button>
+    </form>
 <?php endif; ?>
+
+
 </td>
+
+
+
 </tr>
 <?php endwhile; ?>
 </tbody>
 </table>
 
-<!-- Pagination -->
 <nav>
 <ul class="pagination">
 <?php for($i = 1; $i <= $total_pages; $i++): ?>
 <li class="page-item <?= $i==$page?'active':''; ?>">
-<a class="page-link" href="?page=<?= $i; ?><?= $search!=''?'&search='.urlencode($search):''; ?><?= $filter_status!=''?'&status='.$filter_status:''; ?>"><?= $i; ?></a>
+    <a class="page-link"
+       href="?page=<?= $i; ?><?= $search!=''?'&search='.urlencode($search):''; ?><?= $filter_status!=''?'&status='.$filter_status:''; ?>">
+       <?= $i; ?>
+    </a>
 </li>
 <?php endfor; ?>
+
 </ul>
 </nav>
 
 </div>
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

@@ -244,17 +244,19 @@ $empty_cart = ($result->num_rows === 0);
                 </tr>
             </thead>
             <tbody>
-                <?php
+          <?php
+$panierProduits = [];
 $total = 0;
+
 while ($row = $result->fetch_assoc()) {
     $quantite = intval($row['quantite']);
-    
-    // Gestion du discount actif
+
+    // Prix avec discount
     $prix_utilise = $row['prix'];
     $discount = 0;
-    if(!empty($row['prix_promo']) && !empty($row['date_debut_discount']) && !empty($row['date_fin_discount'])) {
+    if (!empty($row['prix_promo']) && !empty($row['date_debut_discount']) && !empty($row['date_fin_discount'])) {
         $now = date('Y-m-d H:i:s');
-        if($now >= $row['date_debut_discount'] && $now <= $row['date_fin_discount']) {
+        if ($now >= $row['date_debut_discount'] && $now <= $row['date_fin_discount']) {
             $prix_utilise = $row['prix_promo'];
             $discount = $row['discount_percent'];
         }
@@ -263,17 +265,22 @@ while ($row = $result->fetch_assoc()) {
     $subtotal = $prix_utilise * $quantite;
     $total += $subtotal;
 
+    // Stocker dans un tableau temporaire pour le formulaire
+    $panierProduits[] = [
+        'nom' => $row['nom'],
+        'quantite' => $quantite,
+        'prix' => $subtotal
+    ];
+
+    // Affichage du tableau
     echo '<tr>
-        <td>
-            <img src="assets/IMG/'.$row['image'].'" alt="'.$row['nom'].'" style="width:80px; margin-right:10px;">
-            '.$row['nom'].'
-        </td>
+        <td><img src="assets/IMG/'.$row['image'].'" alt="'.$row['nom'].'" style="width:80px;"> '.$row['nom'].'</td>
         <td>';
-            if($discount > 0){
-                echo '<del>'.$row['prix'].' DH</del> '.$prix_utilise.' DH <small class="text-success">(-'.$discount.'%)</small>';
-            } else {
-                echo $prix_utilise.' DH';
-            }
+    if ($discount > 0) {
+        echo '<del>'.$row['prix'].' DH</del> '.$prix_utilise.' DH <small class="text-success">(-'.$discount.'%)</small>';
+    } else {
+        echo $prix_utilise.' DH';
+    }
     echo '</td>
         <td>
             <form method="get" action="panier.php" class="d-flex align-items-center">
@@ -295,8 +302,9 @@ while ($row = $result->fetch_assoc()) {
 ?>
 <tr>
     <td colspan="3"><strong>Total général</strong></td>
-    <td colspan="2"><strong><?php echo $total; ?> DH</strong></td>
+    <td colspan="2"><strong><?= $total ?> DH</strong></td>
 </tr>
+
 
 
             </tbody>
@@ -308,11 +316,12 @@ while ($row = $result->fetch_assoc()) {
 
 
 
-<form id="panierForm" method="post" action="admin/produit/envoye.php" class="text-end">
+<form id="panierForm" method="post" action="add_to_cart.php" class="text-end">
+    <input type="hidden" name="email" value="<?= $email ?>">
+
     <?php
-    // On récupère les infos du panier pour les envoyer
     $i = 0;
-    $result->data_seek(0); // Remet le curseur au début du résultat
+    $result->data_seek(0); // Repart au début du résultat
     while($row = $result->fetch_assoc()) {
         $quantite = intval($row['quantite']);
 
@@ -327,8 +336,6 @@ while ($row = $result->fetch_assoc()) {
 
         $subtotal = $prix_utilise * $quantite;
     ?>
-        <input type="hidden" name="email" value="<?= $email ?>">
-
         <input type="hidden" name="produits[<?= $i ?>][nom]" value="<?= $row['nom'] ?>">
         <input type="hidden" name="produits[<?= $i ?>][quantite]" value="<?= $quantite ?>">
         <input type="hidden" name="produits[<?= $i ?>][prix]" value="<?= $subtotal ?>">
@@ -336,14 +343,17 @@ while ($row = $result->fetch_assoc()) {
         $i++;
     }
     ?>
-    <input type="hidden" name="total_general" value="<?= $total ?>">
-<!-- Bouton qui déclenche le modal -->
-<!-- Bouton qui déclenche le submit et le modal -->
-<button type="button" class="btn btn-primary btn-lg" id="validateBtn">
-    Valider la demande
-</button>
 
+    <input type="hidden" name="total_general" value="<?= $total ?>">
+    <input type="hidden" name="valider_panier" value="1">
+
+    <!-- Bouton de validation -->
+    <button type="button" id="validateBtn" class="btn btn-primary btn-lg">Valider le panier</button>
 </form>
+
+
+
+
 
     <?php endif; ?>
 </section>
@@ -356,6 +366,35 @@ while ($row = $result->fetch_assoc()) {
 
 
 
+<script>
+document.getElementById('validateBtn').addEventListener('click', function() {
+    var form = document.getElementById('panierForm');
+    var formData = new FormData(form);
+
+    fetch(form.action, {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.text())
+    .then(data => {
+        // ✅ Affiche le modal
+        var confirmationModal = new bootstrap.Modal(document.getElementById('confirmationModal'));
+        confirmationModal.show();
+
+        // ✅ Vider le panier visuellement
+        document.getElementById('panierTable').innerHTML = "<p class='alert alert-info'>Votre panier est vide.</p>";
+
+        // ✅ Mettre le total à 0
+        document.querySelector('strong').innerText = '0 DH';
+
+        // ✅ Cacher le bouton
+        document.getElementById('validateBtn').style.display = 'none';
+    })
+    .catch(error => {
+        console.error('Erreur:', error);
+    });
+});
+</script>
 
 
 
@@ -409,7 +448,7 @@ while ($row = $result->fetch_assoc()) {
 
 
 
-
+<!-- 
 <script>
 document.getElementById('validateBtn').addEventListener('click', function() {
     var form = document.getElementById('panierForm');
@@ -440,7 +479,7 @@ document.getElementById('validateBtn').addEventListener('click', function() {
 });
 
 
-</script>
+</script> -->
 
 
 
@@ -488,7 +527,7 @@ document.getElementById('validateBtn').addEventListener('click', function() {
 </div>
 
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
 $('#sendFormBtn').click(function(e){
     e.preventDefault(); // Empêche le rechargement normal du formulaire
@@ -505,7 +544,7 @@ $('#sendFormBtn').click(function(e){
         document.querySelector('#totalGeneral').innerText = '0 DH';
     });
 });
-</script>
+</script> -->
 
 </body>
 </html>

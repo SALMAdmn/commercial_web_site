@@ -8,15 +8,12 @@ if ($conn->connect_error) {
     die("Connexion échouée : " . $conn->connect_error);
 }
 
-// Vérifier que l'utilisateur est connecté
-if (!isset($_SESSION['user_id'])) {
-    header("Location: login.php");
-    exit();
-}
-$user_id = $_SESSION['user_id'];
+$user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
 
-// Ajouter au panier
-if (isset($_POST['add_cart'])) {
+$addedToCart = false;
+
+// Gestion AJAX pour ajout au panier
+if (isset($_POST['action']) && $_POST['action'] === "add_to_cart") {
     $produit_id = intval($_POST['produit_id']);
     $quantite   = max(1, intval($_POST['quantite']));
 
@@ -24,22 +21,23 @@ if (isset($_POST['add_cart'])) {
     $result = $conn->query("SELECT stock FROM produits WHERE id=$produit_id");
     if ($row = $result->fetch_assoc()) {
         $stock = intval($row['stock']);
-        if ($quantite > $stock) {
-            $quantite = $stock;
-        }
+        if ($quantite > $stock) $quantite = $stock;
 
         // Vérifier si produit existe déjà dans le panier
         $check = $conn->query("SELECT * FROM paniers WHERE user_id=$user_id AND produit_id=$produit_id");
         if ($check->num_rows > 0) {
-            $conn->query("UPDATE paniers SET quantite=$quantite WHERE user_id=$user_id AND produit_id=$produit_id");
+            $conn->query("UPDATE paniers SET quantite=quantite+$quantite WHERE user_id=$user_id AND produit_id=$produit_id");
         } else {
             $conn->query("INSERT INTO paniers(user_id, produit_id, quantite) VALUES($user_id, $produit_id, $quantite)");
         }
     }
-    header("Location: produits.php");
+
+    // Retour AJAX
+    echo json_encode(["success" => true]);
     exit();
 }
 ?>
+
 
 
 <!DOCTYPE html>
@@ -375,11 +373,21 @@ if($result->num_rows > 0){
                         </div>
                     </div>
 
-                    <form class="add-to-cart-form" method="POST" action="produits.php?page=<?= $page ?>" data-id="<?= $row['id'] ?>">
-                        <input type="hidden" name="produit_id" value="<?= $row['id'] ?>">
-                        <input type="number" name="quantite" value="1" min="1" max="<?= $row['stock'] ?>" class="form-control mb-2">
-                        <button type="submit" name="add_cart" class="btn btn-custom">Ajouter au panier</button>
-                    </form>
+        <?php if (isset($_SESSION['user_id'])): ?>
+    <form class="add-to-cart-form">
+        <input type="hidden" name="produit_id" value="<?= $row['id'] ?>">
+        <input type="number" name="quantite" value="1" min="1" max="<?= $row['stock'] ?>" class="form-control mb-2">
+        <button type="submit" class="btn btn-custom">Ajouter au panier</button>
+    </form>
+<?php else: ?>
+    <form>
+        <input type="hidden" name="produit_id" value="<?= $row['id'] ?>">
+        <button type="submit" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#connectModal">Envoyer la demande</button>
+    </form>
+<?php endif; ?>
+
+
+
                 </div>
             </div>
         </div>
@@ -579,8 +587,28 @@ if($result->num_rows > 0){
 
 
 
+<!-- Modal Produit ajouté -->
+<div class="modal fade" id="productAddedModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-body text-center">
+        <h5>Produit ajouté au panier ✅</h5>
+        <a href="panier.php" class="btn btn-primary mt-3">Voir le panier</a>
+        <button type="button" class="btn btn-secondary mt-3" data-bs-dismiss="modal">Continuer mes achats</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 
+<?php if ($addedToCart): ?>
+<script>
+document.addEventListener("DOMContentLoaded", function(){
+    var myModal = new bootstrap.Modal(document.getElementById('productAddedModal'));
+    myModal.show();
+});
+</script>
+<?php endif; ?>
 
 
 
@@ -597,27 +625,34 @@ if($result->num_rows > 0){
 <script>
 $(document).ready(function() {
     $('.add-to-cart-form').submit(function(e){
-        e.preventDefault(); // empêche le rechargement de la page
+        e.preventDefault();
 
-        var produitId = $(this).data('id');
-        var quantite = $(this).find('input[name="quantite"]').val();
+        var form = $(this);
+        var produitId = form.find('input[name="produit_id"]').val();
+        var quantite = form.find('input[name="quantite"]').val() || 1;
 
         $.ajax({
-            url: 'add_to_cart.php',
+            url: 'produits.php',
             method: 'POST',
-            data: { produit_id: produitId, quantite: quantite },
+            data: {
+                action: "add_to_cart",
+                produit_id: produitId,
+                quantite: quantite
+            },
+            dataType: "json",
             success: function(response){
-                // alert('Produit ajouté au panier !');  <-- Supprimé ou commenté
-                // tu peux mettre à la place un compteur dans le panier si tu veux
+                if (response.success) {
+                    var myModal = new bootstrap.Modal(document.getElementById('productAddedModal'));
+                    myModal.show();
+                }
             },
             error: function(){
-                 alert('Erreur lors de l\'ajout au panier.'); 
+                alert('Erreur lors de l\'ajout au panier.');
             }
         });
     });
 });
 </script>
-
 
 
 </body>
