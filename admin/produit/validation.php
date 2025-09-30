@@ -25,28 +25,124 @@ if(!$demande){
     die("Demande introuvable.");
 }
 
-if(isset($_POST['valider_envoi'])){
-    if(isset($_FILES['preuve']) && $_FILES['preuve']['error'] == 0){
-        $ext = pathinfo($_FILES['preuve']['name'], PATHINFO_EXTENSION);
-        $filename = 'preuve_'.$id.'_'.time().'.'.$ext;
-        $upload_dir = __DIR__ . '/uploads/';
-
-        if(!is_dir($upload_dir)) mkdir($upload_dir, 0777, true);
-
-        if(move_uploaded_file($_FILES['preuve']['tmp_name'], $upload_dir.$filename)){
-            $conn->query("UPDATE demandes SET preuve='$filename', statut='valide', date_validation=NOW() WHERE id=$id");
-            
-            $demande['preuve'] = $filename;
-            $demande['statut'] = 'valide';
-            $demande['date_validation'] = date('Y-m-d H:i:s');
-            $success = "Preuve uploadée, demande validée.";
-        } else {
-            $error = "Erreur lors de l'upload du fichier.";
-        }
+if (isset($_POST['valider_envoi'])) {
+    // Décoder la liste produits depuis la demande
+    $produits = json_decode($demande['produits'], true);
+    if (!is_array($produits) || count($produits) === 0) {
+        $error = "Données produits invalides.";
     } else {
-        $error = "Veuillez fournir une preuve pour valider.";
-    }
-}
+        // 1) Vérification préliminaire du stock (pour message d'erreur utilisateur)
+        $insuff = false;
+        $insuff_msg = "";
+        foreach ($produits as $p) {
+            $pid = isset($p['produit_id']) ? intval($p['produit_id']) : (isset($p['id']) ? intval($p['id']) : 0);
+            $qte = isset($p['quantite']) ? intval($p['quantite']) : 0;
+
+            if ($pid <= 0 || $qte <= 0) {
+                $insuff = true;
+                $insuff_msg = "Données produit invalides (ID ou quantité manquante).";
+                break;
+            }
+
+            $res = $conn->query("SELECT nom, stock FROM produits WHERE id = $pid");
+            if (!$res || $res->num_rows === 0) {
+                $insuff = true;
+                $insuff_msg = "Produit introuvable (ID: $pid).";
+                break;
+            }
+            $r = $res->fetch_assoc();
+            if (intval($r['stock']) < $qte) {
+                $insuff = true;
+                $insuff_msg = "Stock insuffisant pour le produit : " . htmlspecialchars($r['nom']) .
+                              " (stock disponible : " . intval($r['stock']) . ", demandé : $qte).";
+                break;
+            }
+        }
+
+        if ($insuff) {
+            // Si stock insuffisant => on n'exécute rien d'autre
+            $error = $insuff_msg;
+        } else {
+            // 2) Stock OK pour tous — vérifier la preuve (fichier)
+            if (!isset($_FILES['preuve']) || $_FILES['preuve']['error'] !== 0) {
+                $error = "Veuillez fournir une preuve pour valider.";
+            } else {
+                // Préparer l'upload
+                $ext = pathinfo($_FILES['preuve']['name'], PATHINFO_EXTENSION);
+                $filename = 'preuve_' . $id . '_' . time() . '.' . $ext;
+                $upload_dir = __DIR__ . '/uploads/';
+                if (!is_dir($upload_dir)) mkdir($upload_dir, 0777, true);
+
+                if (!move_uploaded_file($_FILES['preuve']['tmp_name'], $upload_dir . $filename)) {
+                    $error = "Erreur lors de l'upload du fichier.";
+                } else {
+                    // 3) Début de la transaction pour mettre à jour stocks + demande
+                    $conn->begin_transaction();
+                    $ok = true;
+                    $fail_pid = null;
+
+                    $stmt = $conn->prepare("UPDATE produits SET stock = stock - ? WHERE id = ? AND stock >= ?");
+                    if (!$stmt) {
+                        $conn->rollback();
+                        @unlink($upload_dir . $filename);
+                        $error = "Erreur interne (préparation requête).";
+                        $ok = false;
+                    } else {
+                        foreach ($produits as $p) {
+                            $pid = isset($p['produit_id']) ? intval($p['produit_id']) : (isset($p['id']) ? intval($p['id']) : 0);
+                            $qte = isset($p['quantite']) ? intval($p['quantite']) : 0;
+                            $stmt->bind_param("iii", $qte, $pid, $qte);
+                            $stmt->execute();
+                            if ($stmt->affected_rows === 0) {
+                                // Mise à jour n'a pas affecté de ligne => pas assez de stock (conflit)
+                                $ok = false;
+                                $fail_pid = $pid;
+                                break;
+                            }
+                        }
+                        $stmt->close();
+                    }
+
+                    if (!$ok) {
+                        $conn->rollback();
+                        // supprimer le fichier uploadé pour ne pas garder des fichiers orphelins
+                        @unlink($upload_dir . $filename);
+                        // récupérer nom/stock pour message si possible
+                        if ($fail_pid) {
+                            $resf = $conn->query("SELECT nom, stock FROM produits WHERE id = $fail_pid");
+                            $rf = $resf ? $resf->fetch_assoc() : null;
+                            $error = "Stock insuffisant pour le produit : " . ($rf['nom'] ?? "ID $fail_pid") .
+                                     " (stock restant : " . ($rf['stock'] ?? '0') . "). La validation a été annulée.";
+                        } else {
+                            $error = $error ?? "Erreur lors de la mise à jour du stock. Validation annulée.";
+                        }
+                    } else {
+                        // Tous les updates produits se sont bien passés → on met à jour la demande
+                        $stmt2 = $conn->prepare("UPDATE demandes SET preuve = ?, statut = 'valide', date_validation = NOW() WHERE id = ?");
+                        if ($stmt2) {
+                            $stmt2->bind_param("si", $filename, $id);
+                            $stmt2->execute();
+                            $stmt2->close();
+                            $conn->commit();
+
+                            // Mettre à jour copie locale pour affichage
+                            $demande['preuve'] = $filename;
+                            $demande['statut'] = 'valide';
+                            $demande['date_validation'] = date('Y-m-d H:i:s');
+                            $success = "Preuve uploadée, demande validée et stock mis à jour.";
+                        } else {
+                            // problème improbable à cette étape => rollback et suppression fichier
+                            $conn->rollback();
+                            @unlink($upload_dir . $filename);
+                            $error = "Erreur lors de la validation (requête update demandes).";
+                        }
+                    }
+                } // end move_uploaded_file
+            } // end preuve present
+        } // end else stock ok
+    } // end else produits array
+} // end isset valider_envoi
+
 
 ?>
 

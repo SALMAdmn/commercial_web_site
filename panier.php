@@ -348,7 +348,10 @@ while ($row = $result->fetch_assoc()) {
     <input type="hidden" name="valider_panier" value="1">
 
     <!-- Bouton de validation -->
+<?php if (!$empty_cart): ?>
+    <!-- Bouton de validation -->
     <button type="button" id="validateBtn" class="btn btn-primary btn-lg">Valider le panier</button>
+<?php endif; ?>
 </form>
 
 
@@ -512,7 +515,7 @@ document.getElementById('validateBtn').addEventListener('click', function() {
       </div>
       <div class="modal-body">
         Votre demande a été validée !<br>
-        Vous allez recevoir le code bancaire pour procéder au paiement.
+        Vous allez recevoir le code bancaire dans votre email pour procéder au paiement.
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
